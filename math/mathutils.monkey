@@ -20,14 +20,19 @@ Private
 	Global preSin:Int[RANGE]
 	Global preCos:Int[RANGE]
 	
+	Global initialized:Bool = False
+	
 Public
 
 	Function Initialize:Void()
-		For Local i:Int = 0 Until (RANGE)
-			Local value:Float = Float(i) / PRE_SIN_COS_DECIMALS_F
-			preCos[i] = ToDecimalInt(Cos(value))
-			preSin[i] = ToDecimalInt(Sin(value))
-		Next
+		If (Not initialized)
+			For Local i:Int = 0 Until (RANGE)
+				Local value:Float = Float(i) / PRE_SIN_COS_DECIMALS_F
+				preCos[i] = ToDecimalInt(Cos(value))
+				preSin[i] = ToDecimalInt(Sin(value))
+			Next
+			initialized = True
+		End If 
 	End Function
 	
 	Function ToDecimalInt:Int(x:Float)
@@ -45,13 +50,29 @@ Public
 		Return preSin[value]
 	End Function
 	
+	Function PSinF:Float(x:Float)
+		Local value:Int = Int(x * PRE_SIN_COS_DECIMALS_F)
+		value = value Mod RANGE
+		If (value < 0) Then value += RANGE
+		Local sin:Int = preSin[value]
+		Return ToFloat(sin)
+	End Function
+	
 	Function PCos:Int(x:Float)
 		Local value:Int = Int(x * PRE_SIN_COS_DECIMALS_F)
 		value = value Mod RANGE
 		If (value < 0) Then value += RANGE
 		Return preCos[value]
 	End Function
-	
+
+	Function PCosF:Float(x:Float)
+		Local value:Int = Int(x * PRE_SIN_COS_DECIMALS_F)
+		value = value Mod RANGE
+		If (value < 0) Then value += RANGE
+		Local cos:Int = preCos[value]
+		Return ToFloat(cos)
+	End Function
+		
 	Function PSin:Int(x:Int)
 		Local value:Int = Int(x * PRE_SIN_COS_DECIMALS_F)
 		value = value Mod RANGE

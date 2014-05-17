@@ -3,6 +3,7 @@ Strict
 Private
 
 Import mojo
+Import NickelEngine.math.mathutils
 
 Public
 
@@ -56,8 +57,13 @@ Public
 	
 	Method DrawFPS:Void()
 		PushMatrix()
-		
-		Local color:Float = (lastMillisecs / 5) Mod 255.0
+		Local timer:Int = (lastMillisecs / 3) Mod 400
+		Local color:Float
+		If (timer >= 200)
+			color = 255.0 - (timer - 200)
+		Else
+			color = 55.0 + timer
+		End If
 		SetColor(color, color, color)
 		SetBlend(AlphaBlend)
 		SetAlpha(1.0)

@@ -8,34 +8,50 @@ Import NickelEngine.math.mathutils
 
 Public
 
-Class Screen Abstract
+Class Screen
+Private
+
+	Field virtualWidth:Int = 0
+	Field virtualHeight:Int = 0
+	Field virtualWidthF:Float = 0.0
+	Field virtualHeightF:Float = 0.0
+	Field virtualWidthF2:Float = 0.0
+	Field virtualHeightF2:Float = 0.0
+
 Public
 
-	Global virtualWidth:Int = 0
-	Global virtualHeight:Int = 0
-	Global virtualWidthF:Float = 0.0
-	Global virtualHeightF:Float = 0.0
-	Global virtualWidthF2:Float = 0.0
-	Global virtualHeightF2:Float = 0.0
+	Global instance:Screen = New Screen()
 
-Public
+	Method Initialize:Void(vWidth:Float, vHeight:Float)
+		virtualWidth = MathUtils.ToDecimalInt(vWidth)
+		virtualHeight = MathUtils.ToDecimalInt(vHeight)
+		virtualWidthF = vWidth
+		virtualHeightF = vHeight
+		virtualWidthF2 = vWidth / 2.0
+		virtualHeightF2 = vHeight / 2.0
+	
+		#If CONFIG="debug"
+			Print("Virtual Res: " + virtualWidthF + ", " + virtualHeightF)
+			Print("Device Res: " + DeviceWidth() + ", " + DeviceHeight())
+		#End
+	End Method
 
-	Function ToRealX:Float(virtualX:Int)
+	Method ToRealX:Float(virtualX:Int)
 		Local sW:Float = Float(DeviceWidth())
 		Local x:Float = MathUtils.ToFloat(virtualX)
 		Return (x / virtualWidthF) * sW
-	End Function
+	End Method
 
-	Function ToRealY:Float(virtualY:Int)
+	Method ToRealY:Float(virtualY:Int)
 		Local sH:Float = Float(DeviceHeight())
 		Local y:Float = MathUtils.ToFloat(virtualY)
 		Return (y / virtualHeightF) * sH
-	End Function
+	End Method
 
-	Function ApplyScreenScaleMatrix:Void()
+	Method ApplyScreenScaleMatrix:Void()
 		Local scaleX:Float = DeviceWidth() / virtualWidthF
 		Local scaleY:Float = DeviceHeight() / virtualHeightF
 		Scale(scaleX, scaleY)
-	End Function
+	End Method
 
 End Class

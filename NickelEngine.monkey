@@ -7,6 +7,3 @@ Import NickelEngine.system.time
 Import NickelEngine.util.arrayutils
 Import NickelEngine.util.fpscounter
 
-Function Main:Int()
-	Return 0
-End Function
