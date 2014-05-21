@@ -1,5 +1,9 @@
 Strict
 
+Private
+
+Import mojo
+
 Public
 
 Class MathUtils Abstract
@@ -26,6 +30,7 @@ Public
 
 	Function Initialize:Void()
 		If (Not initialized)
+			random.Seed = Millisecs()
 			For Local i:Int = 0 Until (RANGE)
 				Local value:Float = Float(i) / PRE_SIN_COS_DECIMALS_F
 				preCos[i] = ToDecimalInt(Cos(value))
@@ -120,6 +125,19 @@ Public
 			If (arrayInt[i] > xMax) Then xMax = arrayInt[i]
 		End For
 		Return xMax
+	End Function
+	
+	Function RndSmallInt:Int(min:Int, max:Int)
+		Local fixedMin:Int = min, fixedMax:Int = max
+		If (min < 0)
+			fixedMin = 0
+			fixedMax = max - min
+		End If
+		Local rnd:Float = Rnd(fixedMin * 1000.0, (fixedMax + 1) * 1000.0) / 1000.0
+		If (min < 0)
+			rnd += Float(min)
+		End If
+		Return rnd
 	End Function
 	
 End Class
