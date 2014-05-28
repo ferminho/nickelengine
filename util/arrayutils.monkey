@@ -2,18 +2,21 @@ Strict
 
 Public
 
-Class ArrayUtils
-'I did this as generic class <T> but it didn't let me define ArrayUtils<Int> for example :S
+Class ArrayUtils<T>
 Public
-
-	Function CloneIntArray:Int[](arrayToClone:Int[])
-		If (arrayToClone.Length = 0) Then Return []
-		Local length:Int = arrayToClone.Length()
-		Local newArray:Int[] = New Int[length]
-		For Local i:Int = 0 Until length
-			newArray[i] = arrayToClone[i]
+	
+	Function Clone:T[](inputArray:T[])
+		If (inputArray.Length = 0)
+			Return[]
+		End If
+		
+		Local outputArray:T[] = New T[inputArray.Length]
+		
+		For Local i:Int = 0 To inputArray.Length - 1
+			outputArray[i] = inputArray[i]
 		End For
-		Return newArray
+		
+		Return outputArray
 	End Function
 
 End Class
