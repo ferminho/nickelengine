@@ -1,0 +1,4 @@
+syntax: glob
+**/.bmx
+*.bmx.bak
+vba/vbaedit/vbaedit*.exe
