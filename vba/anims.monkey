@@ -323,14 +323,14 @@ Public
 		Return animations.Length
 	End Method
 	
-	Function LoadVBATXT:AnimationPack(file:String)
+	Function LoadUAP:AnimationPack(file:String)
 		Local result:AnimationPack = Null
 		Local fileContent:String = LoadString(file)
 		Local sr:StringReader = Null
 		Local boneSr:StringReader = Null
 		Local animSr:StringReader = Null
 		
-		Print("Loading VBA TXT from " + file)
+		Print("Loading UAP from " + file)
 		
 		If (fileContent.Trim().Length > 0)
 			result = New AnimationPack()
@@ -338,9 +338,9 @@ Public
 			result.height = sr.ReadFloat()
 			result.bonesNumber = sr.ReadInt()
 			boneSr = New StringReader(sr.ReadSection())
-			result.parentBone = Bone.LoadFromVBATXT(boneSr)
+			result.parentBone = Bone.LoadFromUAP(boneSr)
 			animSr = New StringReader(sr.ReadSection())
-			result.animations = Animation.LoadFromVBATXT(animSr)
+			result.animations = Animation.LoadFromUAP(animSr)
 		End If
 		
 		Return result
@@ -359,7 +359,7 @@ Private
 	
 Public
 	
-	Function LoadFromVBATXT:Bone(sr:StringReader)
+	Function LoadFromUAP:Bone(sr:StringReader)
 		Local result:Bone = Null
 		
 		If (sr.HasValue())
@@ -378,7 +378,7 @@ Public
 			While (nextSubsectionStart >= 0 And nextSubsectionStart < nextSubsectionEnd)
 				'there are more sons
 				result.sons = result.sons.Resize(result.sons.Length + 1)
-				result.sons[result.sons.Length - 1] = Bone.LoadFromVBATXT(sr)
+				result.sons[result.sons.Length - 1] = Bone.LoadFromUAP(sr)
 				
 				nextSubsectionStart = sr.str.Find(StringReader.SubSectionStart)
 				nextSubsectionEnd = sr.str.Find(StringReader.SubSectionEnd)
@@ -407,7 +407,7 @@ Private
 	
 Public
 
-	Function LoadFromVBATXT:Animation[](sr:StringReader)
+	Function LoadFromUAP:Animation[](sr:StringReader)
 		Local animationsContent:String[] = sr.str.Split(StringReader.AnimSeparator)
 		Local animations:Animation[] =[]
 		
@@ -420,7 +420,7 @@ Public
 		
 		For Local i:Int = 0 To animationsContent.Length - 1
 			animations[i] = New Animation()
-			animations[i].frames = Frame.LoadFromVBATXT(animationsContent[i].Split(StringReader.FrameSeparator))
+			animations[i].frames = Frame.LoadFromUAP(animationsContent[i].Split(StringReader.FrameSeparator))
 			If (animations[i].frames <> Null)
 				animations[i].duration = animations[i].frames.GetTotalDuration()
 			End If
@@ -456,7 +456,7 @@ Public
 		End If
 	End Method
 	
-	Function LoadFromVBATXT:Frame(framesContent:String[])
+	Function LoadFromUAP:Frame(framesContent:String[])
 		If (framesContent.Length = 0)
 			Return Null
 		End If
@@ -474,10 +474,10 @@ Public
 		frame.boneStates = New BoneState[boneStatesContent.Length]
 
 		For Local i:Int = 0 To boneStatesContent.Length - 1
-			frame.boneStates[i] = BoneState.LoadFromVBATXT(New StringReader(boneStatesContent[i]))
+			frame.boneStates[i] = BoneState.LoadFromUAP(New StringReader(boneStatesContent[i]))
 		End For
 
-		frame.nextFrame = Frame.LoadFromVBATXT(framesContent[1 ..])
+		frame.nextFrame = Frame.LoadFromUAP(framesContent[1 ..])
 		
 		Return frame
 	End Function
@@ -520,7 +520,7 @@ Public
 		Self.graph = graph
 	End Method
 	
-	Function LoadFromVBATXT:BoneState(sr:StringReader)
+	Function LoadFromUAP:BoneState(sr:StringReader)
 		Local bs:BoneState = New BoneState()
 		
 		bs.x = sr.ReadFloat()

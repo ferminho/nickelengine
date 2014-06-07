@@ -2783,8 +2783,8 @@
     </DocUserOptions>
     <DocUserOptions Filename=".\vba\anims.monkey" Open="true" SplitView="false" SplitIsVertical="false" SplitSize="155">
       <CursorPos>
-        <X>50</X>
-        <Y>29</Y>
+        <X>57</X>
+        <Y>303</Y>
       </CursorPos>
       <OutLiningSerialization>
         <Folding_Nodes_Collection>
@@ -3366,7 +3366,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>47</X>
+            <X>44</X>
             <Y>325</Y>
           </StartPoint>
           <Text>...</Text>
@@ -3411,7 +3411,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>46</X>
+            <X>43</X>
             <Y>361</Y>
           </StartPoint>
           <Text>...</Text>
@@ -3486,7 +3486,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>53</X>
+            <X>50</X>
             <Y>409</Y>
           </StartPoint>
           <Text>...</Text>
@@ -3621,7 +3621,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>54</X>
+            <X>51</X>
             <Y>458</Y>
           </StartPoint>
           <Text>...</Text>
@@ -3756,7 +3756,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>51</X>
+            <X>48</X>
             <Y>522</Y>
           </StartPoint>
           <Text>...</Text>
@@ -4553,7 +4553,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>47</X>
+            <X>44</X>
             <Y>325</Y>
           </StartPoint>
           <Text>...</Text>
@@ -4598,7 +4598,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>46</X>
+            <X>43</X>
             <Y>361</Y>
           </StartPoint>
           <Text>...</Text>
@@ -4673,7 +4673,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>53</X>
+            <X>50</X>
             <Y>409</Y>
           </StartPoint>
           <Text>...</Text>
@@ -4808,7 +4808,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>54</X>
+            <X>51</X>
             <Y>458</Y>
           </StartPoint>
           <Text>...</Text>
@@ -4943,7 +4943,7 @@
           <IsEmpty>false</IsEmpty>
           <ASTNestingLevel>1</ASTNestingLevel>
           <StartPoint>
-            <X>51</X>
+            <X>48</X>
             <Y>522</Y>
           </StartPoint>
           <Text>...</Text>
@@ -5165,8 +5165,8 @@
     </DocUserOptions>
     <DocUserOptions Filename=".\vba\sprites.monkey" Open="true" SplitView="false" SplitIsVertical="false" SplitSize="155">
       <CursorPos>
-        <X>22</X>
-        <Y>205</Y>
+        <X>11</X>
+        <Y>199</Y>
       </CursorPos>
       <OutLiningSerialization>
         <Folding_Nodes_Collection>
@@ -6391,5 +6391,6 @@
     <FolderStatus NodePath="NickelEngine\system" Expanded="true" />
     <FolderStatus NodePath="NickelEngine\util" Expanded="true" />
     <FolderStatus NodePath="NickelEngine\vba" Expanded="true" />
+    <FolderStatus NodePath="NickelEngine\vba\vbaedit" Expanded="false" />
   </Folders>
 </JiProjUserOptions>
