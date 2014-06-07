@@ -183,8 +183,8 @@ Global V:VBA = Null
 Global A:AnimState = Null
 Global File:VGP = Null
 
-Global SavePath:String = "untitled.vba"
-Global SaveFile:String = "untitled.vba"
+Global SavePath:String = "untitled.uap"
+Global SaveFile:String = "untitled.uap"
 Global VGPName:String = "defbones.vgp"
 
 Global IsSaved:Int = True
@@ -1435,31 +1435,39 @@ While True
 			Case EVENT_MENUACTION
 				Select (EventData ())
 					Case FILE_NUEVO
-						If (IsSaved Or Confirm ("Start new VBA? Changes will be lost")) Then FileNew ()
+						If (IsSaved Or Confirm ("Start new Anim Pack? Changes will be lost")) Then FileNew ()
 					Case FILE_ABRIR
-						If (IsSaved Or Confirm ("Load VBA? Changes will be lost"))
-							S = RequestFile ("VBAEdit - Select VBA to open", "VoiD Bone Animation (*.vba):vba", False, CurrentDir () + "/")
+						If (IsSaved Or Confirm ("Load Anim Pack? Changes will be lost"))
+							S = RequestFile ("VBAEdit - Select Anim Pack to open", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", False, CurrentDir () + "/")
 							If (S) Then FileLoad (S)
 						EndIf
 					Case FILE_GUARDAR
-						If (SaveFile <> "untitled.vba")
+						If (SaveFile <> "untitled.uap")
 							V.SaveVBA (SavePath)
 							IsSaved = True
 						Else
-							S = RequestFile ("VBAEdit - Select VBA to save as", "VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
+							S = RequestFile ("VBAEdit - Select Anim Pack to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
 							If (S)
-								If (Len (StripExt (S)) = Len (S)) Then S = S + ".vba"
-								V.SaveVBA (S)
+								If (Len (StripExt (S)) = Len (S)) Then S = S + ".uap"
+								If (Lower(Right(Trim(S), 3)) = "vba")
+									V.SaveVBA (S)
+								Else
+									V.SaveUAP (S)
+								EndIf								
 								SaveFile = StripDir (S)
 								SavePath = S
 								IsSaved = True
 							EndIf
 						EndIf
 					Case FILE_GUARDARCOMO
-						S = RequestFile ("VBAEdit - Select VBA to save as", "VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
+						S = RequestFile ("VBAEdit - Select VBA to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
 						If (S)
-							If (Len (StripExt (S)) = Len (S)) Then S = S + ".vba"
-							V.SaveVBA (S)
+							If (Len (StripExt (S)) = Len (S)) Then S = S + ".uap"
+							If (Lower(Right(Trim(S), 3)) = "vba")
+								V.SaveVBA (S)
+							Else
+								V.SaveUAP (S)
+							EndIf
 							SaveFile = StripDir (S)
 							SavePath = S
 							IsSaved = True
@@ -1918,8 +1926,8 @@ Function FileNew ()
 	Bones = Bones[..64]
 	SetStatusText (MainWindow, "New VBA started")
 	SetGadgetText (SetHeight, "Height [" + V.Height + "]")
-	SaveFile = "untitled.vba"
-	SavePath = "untitled.vba"
+	SaveFile = "untitled.uap"
+	SavePath = "untitled.uap"
 	UpdateBoneWindow ()
 	UpdateAnimsWindow ()
 	IsSaved = True
@@ -1948,7 +1956,11 @@ Function FileLoad (S:String)
 '	If (File) Then File.Unload ()
 '	File = VGP.LoadVGP ("tools/defbones.vgp")
 '	VGPName = "defbones.vgp"
-	V = VBA.LoadVBA (S)
+	If (Lower(Right(Trim(S), 3)) = "vba")
+		V = VBA.LoadVBA (S)
+	Else
+		V = VBA.LoadUAP (S)
+	EndIf
 	A = AnimState.Create (V)
 	A.V = V
 	A.Loop = True
@@ -1961,7 +1973,7 @@ Function FileLoad (S:String)
 	A.FrameTime2 = 0
 	Bones = Bones[0..0]
 	Bones = Bones[..64]
-	SetStatusText (MainWindow, "VBA "+S+" loaded OK")
+	SetStatusText (MainWindow, "VBA/UAP "+S+" loaded OK")
 	SetGadgetText (SetHeight, "Height [" + V.Height + "]")
 	SaveFile = StripDir (S)
 	SavePath = S

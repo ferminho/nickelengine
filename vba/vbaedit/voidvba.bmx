@@ -152,7 +152,7 @@ Type AnimState
 	' warning : must be provided with SizeX and SizeY not taking Zooms into account ;
 	' will calculate the final position depending on the ACTUAL size on screen
 	' postit : funcionara con sizex negativo para los flips? si no, arreglarlo
-	Method PrepareBoneList (ActTime:Float, SizeX:Float = 1.0, SizeY:Float = 1.0, Angle = 0.0)
+	Method PrepareBoneList (ActTime:Float, SizeX:Float = 1.0, SizeY:Float = 1.0, Angle:Float = 0.0)
 		Local Per1:Float, Per2:Float
 		Local Bo:VBABone
 		Local RelAngle:Float
@@ -162,7 +162,6 @@ Type AnimState
 		Local Rep:RepBone
 		Local TX:Float, TY:Float
 		BoneList.Clear ()
-		If (SizeX = 0.0 Or SizeY = 0.0) Then Return
 		If (CurrentAnim > -1 And (CurrentFrame))
 			'because if no anim, nothing to do
 			If (V.NBones > 0)
@@ -651,7 +650,6 @@ Type VBA
 		Local I:Int = 0, J:Int = 0
 		Local OnStack:Int = 0
 		
-		
 		If (Not FH) Then Crash ("Could not create VBA " + File$)
 		
 		FH.WriteByte (Asc ("v"))
@@ -710,6 +708,57 @@ Type VBA
 		FH = Null
 	End Method
 ' ---
+	Function LoadUAP:VBA (File:String)
+		Local Result:VBA = Null
+		Local FileContent:String = LoadString(File)
+		Local Sr:StringReader = Null
+		Local BoneSr:StringReader = Null
+		Local AnimSr:StringReader = Null
+		
+		If (FileContent.Trim().Length > 0)
+			Result = New VBA
+			Sr = StringReader.Create(FileContent)
+			Result.Height = Sr.ReadFloat()
+			Result.NBones = Sr.ReadInt()
+			BoneSr = StringReader.Create(Sr.ReadSection())
+			Result.Father = VBABone.LoadFromVBA(BoneSr)
+			AnimSr = StringReader.Create(Sr.ReadSection())
+			Result.Anim = VBAAnim.LoadFromVBA(AnimSr)
+			Result.NAnims = Len(Result.Anim)
+		End If
+		
+		Return Result
+	End Function	
+' ---
+	Method SaveUAP(file:String)
+		Local fh:TStream = WriteFile(file)
+		Local i:Int = 0
+		If (Not fh) Then Crash ("Could not create UAP " + file$)
+		
+		'height
+		fh.WriteLine(WrapValue(Height))
+		'bones
+		fh.WriteLine(WrapValue(NBones))
+		fh.WriteLine(SectionStart)
+		If (Father <> Null)
+			fh.WriteLine(SubSectionStart)
+			Father.ExtractTo(fh)
+			fh.WriteLine(SubSectionEnd)
+		EndIf
+		fh.WriteLine(SectionEnd)
+		'anims
+		fh.WriteLine(SectionStart)
+		For i = 0 To (NAnims - 1)
+			If (i <> 0)
+				fh.WriteLine(AnimSeparator)
+			EndIf
+			Anim[i].ExtractTo(fh)
+		Next
+		fh.WriteLine(SectionEnd)
+		
+		CloseStream(fh)
+	End Method
+' ---
 	Method Unload ()
 		Local I:Int
 		Local F:VBAFrame = Null
@@ -755,6 +804,57 @@ Type VBABone	' bone
 ' ---
 	Field NSons:Int = 0	' sons
 	Field Sons:VBABone[0]
+' ---
+	Function LoadFromVBA:VBABone(Sr:StringReader)
+		Local Result:VBABone = Null
+		
+		If (Sr.HasValue())
+			Result = New VBABone
+			Result.ID = Sr.ReadInt()
+			Sr.ReadString() 'TODO: name - unused yet
+			Sr.ReadInt() 'TODO: range1 - unused yet
+			Sr.ReadInt() 'TODO: range2 - unused yet
+			
+			'children
+			Sr.ReadSubSectionStart()
+			Result.Sons = New VBABone[0]
+			Local NextSubsectionStart:Int = Sr.str.Find(SubSectionStart)
+			Local NextSubsectionEnd:Int = Sr.str.Find(SubSectionEnd)
+
+			While (NextSubsectionStart >= 0 And NextSubsectionStart < NextSubsectionEnd)
+				'there are more sons
+				Result.Sons = Result.Sons[..Len(result.sons) + 1]
+				Result.Sons[Len(Result.Sons) - 1] = VBABone.LoadFromVBA(Sr)
+				
+				NextSubsectionStart = Sr.str.Find(SubSectionStart)
+				NextSubsectionEnd = Sr.str.Find(SubSectionEnd)
+			End While
+			Result.NSons = Len(Result.Sons)
+			Sr.ReadSubSectionEnd()
+						
+		End If
+		
+		Return Result
+	End Function
+' ---
+	Method ExtractTo (fh:TStream)
+		Local i:Int = 0
+		'id
+		fh.WriteLine(WrapValue(ID))
+		'name
+		fh.WriteLine(WrapValue(Name))
+		'range1
+		fh.WriteLine(WrapValue(Range1))
+		'range2
+		fh.WriteLine(WrapValue(Range2))
+		
+		' children
+		fh.WriteLine(SubSectionStart)
+		For i = 0 To (NSons - 1)
+			Sons[i].ExtractTo(fh)
+		Next
+		fh.WriteLine(SubSectionEnd)
+	End Method
 ' ---
 End Type
 
@@ -846,6 +946,34 @@ Type VBAAnim
 		NFrames:- 1
 	End Method
 ' ---
+	Method ExtractTo (fh:TStream)
+		'frames
+		If (Frames <> Null)
+			Frames.ExtractTo(fh)
+		EndIf
+	End Method
+' ---
+	Function LoadFromVBA:VBAAnim[](sr:StringReader)
+		Local animationsContent:String[] = sr.str.Split(AnimSeparator)
+		Local animations:VBAAnim[] = New VBAAnim[0]
+		
+		If (Len(animationsContent) = 1 And Len(animationsContent[0].Trim()) = 0)
+			Return New VBAAnim[0]
+		End If
+		
+		animations = New VBAAnim[Len(animationsContent)]
+		
+		For Local i:Int = 0 To Len(animationsContent) - 1
+			animations[i] = New VBAAnim
+			animations[i].Frames = VBAFrame.LoadFromVBA(animationsContent[i].Split(FrameSeparator))
+			If (animations[i].Frames <> Null)
+				animations[i].Duration = animations[i].Frames.GetTotalDuration()
+			End If
+		Next
+		
+		Return animations
+	End Function
+' ---
 End Type
 
 
@@ -868,6 +996,57 @@ Type VBAFrame
 		EndIf
 		Return (F)
 	End Method
+' ---
+	Method GetTotalDuration:Int()
+		If (NextFrame <> Null)
+			Return duration + nextFrame.GetTotalDuration()
+		Else
+			Return duration
+		End If
+	End Method
+' ---
+	Method ExtractTo (fh:TStream)
+		Local i:Int = 0
+		'duration
+		fh.WriteLine(WrapValue(Duration))
+		'bonestates
+		For i = 0 To (Bones.length - 1)
+			If (i <> 0)
+				fh.WriteLine(BoneStateSeparator)
+			EndIf
+			Bones[i].ExtractTo(fh)
+		Next
+		If (NextFrame <> Null)
+			fh.WriteLine(FrameSeparator)
+			NextFrame.ExtractTo(fh)
+		EndIf
+	End Method
+' ---
+	Function LoadFromVBA:VBAFrame(framesContent:String[])
+		If (Len(framesContent) = 0)
+			Return Null
+		End If
+		
+		Local sr:StringReader = StringReader.Create(framesContent[0])
+		
+		If (Not sr.HasValue())
+			Return Null
+		End If
+		
+		Local frame:VBAFrame = New VBAFrame
+		Local boneStatesContent:String[] = New String[0]
+		frame.Duration = sr.ReadInt()
+		boneStatesContent = sr.str.Split(BoneStateSeparator)
+		frame.Bones = New VBABoneState[boneStatesContent.Length]
+
+		For Local i:Int = 0 To boneStatesContent.Length - 1
+			frame.Bones[i] = VBABoneState.LoadFromVBA(StringReader.Create(boneStatesContent[i]))
+		Next
+
+		frame.NextFrame = VBAFrame.LoadFromVBA(framesContent[1 ..])
+		
+		Return frame
+	End Function
 ' ---
 End Type
 
@@ -892,6 +1071,34 @@ Type VBABoneState
 		Return VBS
 	End Method
 ' ---
+	Method ExtractTo (fh:TStream)
+		'x
+		fh.WriteLine(WrapValue(X))
+		'y
+		fh.WriteLine(WrapValue(Y))
+		'angle : in Bmax angles grow clockwise, so let's export CCW which is the standard
+		fh.WriteLine(WrapValue(360.0 - Angle))
+		'z
+		fh.WriteLine(WrapValue(Z))
+		'size
+		fh.WriteLine(WrapValue(Size))
+		'graph
+		fh.WriteLine(WrapValue(Graph))
+	End Method
+' ---
+	Function LoadFromVBA:VBABoneState(sr:StringReader)
+		Local bs:VBABoneState = New VBABoneState
+		
+		bs.X = sr.ReadFloat()
+		bs.Y = sr.ReadFloat()
+		bs.Angle = sr.ReadFloat()
+		bs.Z = sr.ReadInt()
+		bs.Size = sr.ReadFloat()
+		bs.Graph = sr.ReadInt()
+		
+		Return bs
+	End Function
+' ---
 End Type
 
 
@@ -907,4 +1114,78 @@ Function Crash (S:String)
 	End
 End Function
 
+Function WrapValue:String(s:String)
+	Return Delimiter + s + Delimiter
+End Function
 
+Const Delimiter:String = "~~~~"
+Const AnimSeparator:String = "::"
+Const FrameSeparator:String = "||"
+Const BoneStateSeparator:String = "##"
+Const SectionStart:String = "[["
+Const SectionEnd:String = "]]"
+Const SubSectionStart:String = "{{"
+Const SubSectionEnd:String = "}}"
+
+' An utility class for reading from string-files
+Type StringReader
+	Field str:String = ""
+
+	Function Create:StringReader(str:String)
+		Local sr:StringReader = New StringReader
+		sr.str = str
+		Return sr
+	End Function
+
+	Method HasValue:Int()
+		Local i:Int = str.Find(Delimiter)
+		Return i >= 0
+	End Method
+	
+	Method ReadFloat:Float()
+		Local i:Int = str.Find(Delimiter)
+		Local j:Int = str.Find(Delimiter, i + 2)
+		Local f:Float = Float(str[i + 2 .. j])
+		str = str[j + 2 ..]
+		Return f
+	End Method
+
+	Method ReadInt:Float()
+		Local i:Int = str.Find(Delimiter)
+		Local j:Int = str.Find(Delimiter, i + 2)
+		Local in:Int = Int(str[i + 2 .. j])
+		str = str[j + 2 ..]
+		Return in
+	End Method
+	
+	Method ReadString:String()
+		Local i:Int = str.Find(Delimiter)
+		Local j:Int = str.Find(Delimiter, i + 2)
+		Local s:String = str[i + 2 .. j]
+		str = str[j + 2 ..]
+		Return s
+	End Method
+	
+	Method ReadSection:String()
+		Local i:Int = str.Find(SectionStart)
+		Local j:Int = str.Find(SectionEnd, i + 2)
+		Local s:String = str[i + 2 .. j]
+		str = str[j + 2 ..]
+		Return s
+	End Method
+	
+	Method ReadSubSectionStart()
+		Local i:Int = str.Find(SubSectionStart)
+		If (i >= 0)
+			str = str[i + 2 ..]
+		End If
+	End Method
+
+	Method ReadSubSectionEnd()
+		Local i:Int = str.Find(SubSectionEnd)
+		If (i >= 0)
+			str = str[i + 2 ..]
+		End If
+	End Method
+
+End Type
