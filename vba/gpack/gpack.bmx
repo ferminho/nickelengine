@@ -191,7 +191,7 @@ End Function
 Function GetFilenameBase:String()
 	Local folder:String = CurrentDir()
 	folder = StripAll(folder)
-	filenameBase = folder + "_" + maxWidth + "x" + maxHeight
+	filenameBase = folder + "_" + (maxNumber + 1) + "-" + maxWidth + "x" + maxHeight 
 End Function
 
 Function DrawAndWriteImages()
