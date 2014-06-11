@@ -154,10 +154,10 @@ Function GetOptimalSize()
 		
 	For Local rows:Int = 1 To numFrames
 		Local cols:Int = Ceil(Float(numFrames) / rows)
-		Local width:Int = NextPOT(cols * maxWidth)
-		Local height:Int = NextPOT(rows * maxHeight)
-		Local unusedArea:Int = (width * height) - (numFrames * maxWidth * maxHeight)
-		Print ("rows " + rows + " cols " + cols + " = " + width + " x " + height + " ; unused: " + unusedArea)
+		Local width:Int = cols * maxWidth
+		Local height:Int = rows * maxHeight
+		Local unusedArea:Int = (NextPOT(width) * NextPOT(height)) - (numFrames * maxWidth * maxHeight)
+		Print ("rows " + rows + " cols " + cols + " = " + width + " x " + height + " -> " + NextPOT(width) + " x " + NexPOT(heigh) + " ; unused: " + unusedArea)
 		If (unusedArea <= bestUnusedArea)
 			bestUnusedArea = unusedArea
 		EndIf
@@ -182,9 +182,8 @@ Function GetOptimalSize()
 	
 	totalRows = bestRows
 	totalCols = bestCols
-	globalWidth = NextPOT(totalCols * maxWidth)
-	globalHeight = NextPOT(totalRows * maxHeight)
-	
+	globalWidth = totalCols * maxWidth
+	globalHeight = totalRows * maxHeight
 	Print ("ROWSxCOLS : " + totalRows + " x " + totalCols + " --> " + globalWidth + " x " + globalHeight)
 End Function
 
