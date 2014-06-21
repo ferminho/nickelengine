@@ -10,6 +10,9 @@ Import BRL.StandardIO
 
 Import "..\ugpioutils.bmx"
 
+Const G_WIDTH:Int = 1280
+Const G_HEIGHT:Int = 720
+
 Global currentImage:Int = 0
 Global camX:Float = 0.0
 Global camY:Float = 0.0
@@ -23,7 +26,7 @@ If (Len(validFiles) <= 0)
 	RuntimeError("No images found")
 EndIf
 
-Graphics(1280, 720, 0, 60, GRAPHICS_BACKBUFFER)
+Graphics(G_WIDTH, G_HEIGHT, 0, 60, GRAPHICS_BACKBUFFER)
 LoadImages()
 CreateBackground()
 
@@ -43,7 +46,16 @@ Function DrawBackground()
 	SetBlend(SOLIDBLEND)
 	SetScale(1.0, 1.0)
 	SetRotation(0.0)
-	DrawImage(background, 0, 0)
+	
+	Local cols:Int = G_WIDTH / BG_SIDE
+	Local rows:Int = G_HEIGHT / BG_SIDE
+	
+	For Local y:Int = -1 To rows
+		For Local x:Int = -1 To cols
+			DrawImage(background, x * BG_SIDE, y * BG_SIDE)
+		Next
+	Next
+	
 End Function
 
 
