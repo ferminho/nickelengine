@@ -15,6 +15,7 @@ Const MAX_GRAPHICS:Int = 4096
 Global validFiles:String[] = New String[0]
 Global numbers:Int[] = New Int[0]
 Global pixmaps:TPixmap[]
+Global images:TImage[]
 Global xHandles:Int[]
 Global yHandles:Int[]
 
@@ -65,9 +66,10 @@ Function ArrayContainsInt:Int(ints:Int[], i:Int)
 	Return False
 End Function
 
-Function LoadImages()
-	AutoMidHandle(False)
+Function LoadImages(midHandle:Int = False, loadImages:Int = False)
+	AutoMidHandle(midHandle)
 	pixmaps = New TPixmap[Len(validFiles)]
+	If (loadImages) Then images = New TImage[Len(validFiles)]
 	xHandles = New Int[maxNumber + 1]
 	yHandles = New Int[maxNumber + 1]
 	Local i:Int = 0
@@ -77,6 +79,7 @@ Function LoadImages()
 			If (pixmaps[i] = Null)
 				Throw "Null"
 			EndIf
+			If (loadImages) Then images[i] = LoadImage(file, 0)
 			SetHandles(i, file)
 			If (PixmapWidth(pixmaps[i]) > MaxWidth) Then MaxWidth = PixmapWidth(pixmaps[i])
 			If (PixmapHeight(pixmaps[i]) > MaxHeight) Then MaxHeight = PixmapHeight(pixmaps[i])
