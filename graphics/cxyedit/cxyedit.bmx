@@ -10,18 +10,28 @@ Import BRL.StandardIO
 
 Import "..\ugpioutils.bmx"
 
-Const G_WIDTH:Int = 1280
-Const G_HEIGHT:Int = 720
-Const G_WIDTH2:Int = G_WIDTH / 2
-Const G_HEIGHT2:Int = G_HEIGHT / 2
+Const G_WIDTH:Float = 1280
+Const G_HEIGHT:Float = 720
+Const G_WIDTH2:Float = G_WIDTH / 2.0
+Const G_HEIGHT2:Float = G_HEIGHT / 2.0
 
-Global currentImage:Int = 0
+Const ZOOM_SPEED:Float = 0.1
+Const ZOOM_SPEED_IN:Float = 1.0 + ZOOM_SPEED
+Const ZOOM_SPEED_OUT:Float = 1.0 - ZOOM_SPEED
+Const CAM_SPEED:Float = 16 / 60.0
+Const CAM_SPEED_MULT:Float = 1.5
+
+
 Global camX:Float = 0.0
 Global camY:Float = 0.0
 Global camZoomInv:Float = 1.0
 Global background:TImage
 Global bgXD:Float = 0.0
 Global bgYD:Float = 0.0
+
+Global currentImage:Int = 0
+
+Global frameCounter:Int = 0
 
 Global allFiles:String[] = LoadDir(CurrentDir())
 
@@ -36,11 +46,12 @@ LoadImages(True, True)
 CreateBackground()
 
 While Not (KeyHit(KEY_ESCAPE))
+	frameCounter :+ 1
 	Cls()
 	CheckControls()
 	DrawBackground()
 	DrawCurrentImage()
-	DrawOverlays()
+	DrawCornerOverlays()
 	Flip(1)
 Wend
 
@@ -50,14 +61,41 @@ End
 
 
 Function CheckControls()
+
+	If (KeyHit(KEY_SPACE))
+		camX = 0.0
+		camY = 0.0
+		camZoomInv = 1.0
+	EndIf
+
+	Local camSpeed:Float = CAM_SPEED
+	If (KeyDown(KEY_LSHIFT) Or KeyDown(KEY_RSHIFT))
+		camSpeed :* CAM_SPEED_MULT * 3.0
+	ElseIf (KeyDown(KEY_LCONTROL) Or KeyDown(KEY_RCONTROL))
+		camSpeed :* CAM_SPEED_MULT * 2.0
+	ElseIf (KeyDown(KEY_LALT) Or KeyDown(KEY_RALT))
+		camSpeed :* CAM_SPEED_MULT
+	EndIf
+	
+	If (KeyDown(KEY_A)) 
+		camX :- camSpeed * camZoomInv
+	ElseIf (KeyDown(KEY_D)) 
+		camX :+ camSpeed * camZoomInv
+	EndIf
+	If (KeyDown(KEY_W)) 
+		camY :- camSpeed * camZoomInv
+	ElseIf (KeyDown(KEY_S)) 
+		camY :+ camSpeed * camZoomInv
+	EndIf
+	
 	If (MouseHit(1))
 
 	Else
 		Local mz:Int = MouseZ()
 		If (mz < 0)
-			camZoomInv = camZoomInv * (0.90 ^ -mz)
+			camZoomInv = camZoomInv * (ZOOM_SPEED_OUT ^ -mz)
 		ElseIf (mz > 0)
-			camZoomInv = camZoomInv * (1.10 ^ mz)
+			camZoomInv = camZoomInv * (ZOOM_SPEED_IN ^ mz)
 		EndIf
 	EndIf
 	
@@ -69,6 +107,7 @@ Function DrawBackground()
 	SetBlend(SOLIDBLEND)
 	SetScale(1.0, 1.0)
 	SetRotation(0.0)
+	SetColor(255, 255, 255)
 	
 	bgXD = (bgXD + 0.5) Mod BG_SIDE
 	bgYD = (bgYD + 0.25) Mod BG_SIDE
@@ -89,15 +128,39 @@ Function DrawCurrentImage()
 	SetBlend(ALPHABLEND)
 	SetScale(camZoomInv, camZoomInv)
 	SetRotation(0.0)
+	SetColor(255, 255, 255)
 
-	DrawImage(images[currentImage], G_WIDTH2, G_HEIGHT2)
+	DrawImage(images[currentImage], camX + G_WIDTH2, camY + G_HEIGHT2)
 End Function
 
-Function DrawOverlays()
-	SetAlpha(1.0)
+Function DrawCornerOverlays()
 	SetBlend(ALPHABLEND)
-	SetScale(camZoomInv, camZoomInv)
+	SetScale(1.0, 1.0)
 	SetRotation(0.0)
+	
+	Local color:Int = frameCounter Mod 256
+	Local alpha:Float = 1.0 - Abs(((frameCounter * 0.01) Mod 1.0) - 0.5)
+	SetColor(frameCounter, 0, 0)
+	SetAlpha(alpha)
+	
+	Local w:Int = ImageWidth(images[currentImage])
+	Local h:Int = ImageHeight(images[currentImage])
+	Local w2:Float = w / 2.0
+	Local h2:Float = h / 2.0
+	
+	Local x1:Float = G_WIDTH2 + ((-w2 - 5.0) * camZoomInv)  	
+	Local x2:Float = G_WIDTH2 + (-w2 * camZoomInv)
+	Local x3:Float = G_WIDTH2 + (w2 * camZoomInv)
+	Local x4:Float = G_WIDTH2 + ((w2 + 5.0) * camZoomInv)
+	Local y1:Float = G_HEIGHT2 + ((-h2 - 5.0) * camZoomInv)
+	Local y2:Float = G_HEIGHT2 + (-h2 * camZoomInv)
+	Local y3:Float = G_HEIGHT2 + (h2 * camZoomInv)
+	Local y4:Float = G_HEIGHT2 + ((h2 + 6.0) * camZoomInv)
+
+	DrawRect(x1, y1, x2 - x1, y3 - y1)
+	DrawRect(x1, y3, x3 - x1, y4 - y3)
+	DrawRect(x2, y1, x4 - x2, y2 - y1)
+	DrawRect(x3, y2, x4 - x3, y4 - y2)
 
 End Function
 
