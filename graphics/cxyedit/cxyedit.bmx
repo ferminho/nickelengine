@@ -20,7 +20,7 @@ Const ZOOM_SPEED_IN:Float = 1.0 + ZOOM_SPEED
 Const ZOOM_SPEED_OUT:Float = 1.0 - ZOOM_SPEED
 Const CAM_SPEED:Float = 16 / 60.0
 Const CAM_SPEED_MULT:Float = 1.5
-
+Const BORDER_MARGIN:Float = 7.0
 
 Global camX:Float = 0.0
 Global camY:Float = 0.0
@@ -44,6 +44,7 @@ EndIf
 Graphics(G_WIDTH, G_HEIGHT, 0, 60, GRAPHICS_BACKBUFFER)
 LoadImages(True, True)
 CreateBackground()
+SelectImage(0)
 
 While Not (KeyHit(KEY_ESCAPE))
 	frameCounter :+ 1
@@ -52,6 +53,7 @@ While Not (KeyHit(KEY_ESCAPE))
 	DrawBackground()
 	DrawCurrentImage()
 	DrawCornerOverlays()
+	DrawCXYOverlays()
 	Flip(1)
 Wend
 
@@ -59,47 +61,80 @@ Wend
 End
 
 
+Function SelectImage(num:Int)
+	currentImage = num
+	camX = 0.0
+	camY = 0.0
+	Local w:Float = ImageWidth(images[num])
+	Local h:Float = ImageHeight(images[num])
+	Local r:Float = Max(w / (G_WIDTH - BORDER_MARGIN), h / (G_HEIGHT - BORDER_MARGIN))
+	camZoomInv = 1.0 / r
+End Function
 
 Function CheckControls()
 
-	If (KeyHit(KEY_SPACE))
-		camX = 0.0
-		camY = 0.0
-		camZoomInv = 1.0
-	EndIf
-
-	Local camSpeed:Float = CAM_SPEED
-	If (KeyDown(KEY_LSHIFT) Or KeyDown(KEY_RSHIFT))
-		camSpeed :* CAM_SPEED_MULT * 3.0
-	ElseIf (KeyDown(KEY_LCONTROL) Or KeyDown(KEY_RCONTROL))
-		camSpeed :* CAM_SPEED_MULT * 2.0
-	ElseIf (KeyDown(KEY_LALT) Or KeyDown(KEY_RALT))
-		camSpeed :* CAM_SPEED_MULT
-	EndIf
-	
-	If (KeyDown(KEY_A)) 
-		camX :- camSpeed * camZoomInv
-	ElseIf (KeyDown(KEY_D)) 
-		camX :+ camSpeed * camZoomInv
-	EndIf
-	If (KeyDown(KEY_W)) 
-		camY :- camSpeed * camZoomInv
-	ElseIf (KeyDown(KEY_S)) 
-		camY :+ camSpeed * camZoomInv
-	EndIf
-	
-	If (MouseHit(1))
-
+	If (KeyHit(KEY_Q) And currentImage > 0)
+		SelectImage(currentImage - 1)
+	ElseIf (KeyHit(KEY_E) And currentImage < Len(images) - 1)
+		SelectImage(currentImage + 1)
 	Else
-		Local mz:Int = MouseZ()
-		If (mz < 0)
-			camZoomInv = camZoomInv * (ZOOM_SPEED_OUT ^ -mz)
-		ElseIf (mz > 0)
-			camZoomInv = camZoomInv * (ZOOM_SPEED_IN ^ mz)
-		EndIf
-	EndIf
 	
-FlushMouse()
+		If (KeyHit(KEY_SPACE))
+			camX = 0.0
+			camY = 0.0
+			camZoomInv = 1.0
+		EndIf
+	
+		Local camSpeed:Float = CAM_SPEED
+		If (KeyDown(KEY_LSHIFT) Or KeyDown(KEY_RSHIFT))
+			camSpeed :* CAM_SPEED_MULT * 3.0
+		ElseIf (KeyDown(KEY_LCONTROL) Or KeyDown(KEY_RCONTROL))
+			camSpeed :* CAM_SPEED_MULT * 2.0
+		ElseIf (KeyDown(KEY_LALT) Or KeyDown(KEY_RALT))
+			camSpeed :* CAM_SPEED_MULT
+		EndIf
+		
+		If (KeyDown(KEY_A)) 
+			camX :+ camSpeed * camZoomInv
+		ElseIf (KeyDown(KEY_D)) 
+			camX :- camSpeed * camZoomInv
+		EndIf
+		If (KeyDown(KEY_W)) 
+			camY :+ camSpeed * camZoomInv
+		ElseIf (KeyDown(KEY_S)) 
+			camY :- camSpeed * camZoomInv
+		EndIf
+		
+		If (MouseHit(1))
+			ChangeHandle(MouseX(), MouseY())
+		Else
+			Local mz:Int = MouseZ()
+			If (mz < 0)
+				camZoomInv = camZoomInv * (ZOOM_SPEED_OUT ^ -mz)
+			ElseIf (mz > 0)
+				camZoomInv = camZoomInv * (ZOOM_SPEED_IN ^ mz)
+			EndIf
+		EndIf
+	
+		FlushMouse()
+	EndIf
+End Function
+
+Function ChangeHandle(xs:Float, ys:Float)
+	Local w:Int = ImageWidth(images[currentImage])
+	Local h:Int = ImageHeight(images[currentImage])
+	Local w2:Float = w / 2.0
+	Local h2:Float = h / 2.0
+	Local x0:Float = G_WIDTH2 + camX + (-w2 * camZoomInv)
+	Local y0:Float = G_HEIGHT2 + camY + (-h2 * camZoomInv)
+	Local xH:Float = (xs - x0) / camZoomInv
+	Local yH:Float = (ys - y0) / camZoomInv
+	
+	If (xH > 0.0 And xH < w And yH > 0.0 And yH < h)
+		xHandles[currentImage] = xH
+		yHandles[currentImage] = yH
+		SaveCurrentHandle()
+	EndIf
 End Function
 
 Function DrawBackground()
@@ -140,7 +175,7 @@ Function DrawCornerOverlays()
 	
 	Local color:Int = frameCounter Mod 256
 	Local alpha:Float = 1.0 - Abs(((frameCounter * 0.01) Mod 1.0) - 0.5)
-	SetColor(frameCounter, 0, 0)
+	SetColor(color, 0, 0)
 	SetAlpha(alpha)
 	
 	Local w:Int = ImageWidth(images[currentImage])
@@ -148,20 +183,54 @@ Function DrawCornerOverlays()
 	Local w2:Float = w / 2.0
 	Local h2:Float = h / 2.0
 	
-	Local x1:Float = G_WIDTH2 + ((-w2 - 5.0) * camZoomInv)  	
-	Local x2:Float = G_WIDTH2 + (-w2 * camZoomInv)
-	Local x3:Float = G_WIDTH2 + (w2 * camZoomInv)
-	Local x4:Float = G_WIDTH2 + ((w2 + 5.0) * camZoomInv)
-	Local y1:Float = G_HEIGHT2 + ((-h2 - 5.0) * camZoomInv)
-	Local y2:Float = G_HEIGHT2 + (-h2 * camZoomInv)
-	Local y3:Float = G_HEIGHT2 + (h2 * camZoomInv)
-	Local y4:Float = G_HEIGHT2 + ((h2 + 6.0) * camZoomInv)
+	Local x1:Float = G_WIDTH2 + camX + (-w2 * camZoomInv) - BORDER_MARGIN
+	Local x2:Float = G_WIDTH2 + camX + (-w2 * camZoomInv)
+	Local x3:Float = G_WIDTH2 + camX + (w2 * camZoomInv)
+	Local x4:Float = G_WIDTH2 + camX + (w2 * camZoomInv)  + BORDER_MARGIN
+	Local y1:Float = G_HEIGHT2 + camY + (-h2 * camZoomInv) - BORDER_MARGIN
+	Local y2:Float = G_HEIGHT2 + camY + (-h2 * camZoomInv)
+	Local y3:Float = G_HEIGHT2 + camY + (h2 * camZoomInv)
+	Local y4:Float = G_HEIGHT2 + camY + (h2 * camZoomInv) + BORDER_MARGIN
 
 	DrawRect(x1, y1, x2 - x1, y3 - y1)
 	DrawRect(x1, y3, x3 - x1, y4 - y3)
 	DrawRect(x2, y1, x4 - x2, y2 - y1)
 	DrawRect(x3, y2, x4 - x3, y4 - y2)
+End Function
 
+Function DrawCXYOverlays()
+	SetBlend(ALPHABLEND)
+	SetScale(camZoomInv, camZoomInv)
+	SetRotation(0.0)
+	
+	Local color:Int = Abs(((frameCounter * 0.05) Mod 512.0) - 256.0)
+	Local alpha:Float = Abs(((frameCounter * 0.05) Mod 2.0) - 1.0)
+	SetColor(color, color, 0)
+	SetAlpha(alpha)
+	
+	Local w:Int = ImageWidth(images[currentImage])
+	Local h:Int = ImageHeight(images[currentImage])
+	Local w2:Float = w / 2.0
+	Local h2:Float = h / 2.0
+	
+	Local x:Float = G_WIDTH2 + camX + (-w2 + xHandles[currentImage]) * camZoomInv 
+	Local y:Float = G_HEIGHT2 + camY + (-w2 + yHandles[currentImage]) * camZoomInv 
+
+	DrawRect(0.0, y, G_WIDTH, 1.0)
+	DrawRect(x, 0.0, 1.0, G_HEIGHT)
+	SetColor(0, 0, 0)
+End Function
+
+Function SaveCurrentHandle()
+	Local file:String = validFiles[currentImage]
+	Local handlesFile:String = StripExt(file) + ".cxy"
+	If (FileType(handlesFile) = FILETYPE_DIR) Then RuntimeError("Cannot update " + handlesFile + " since file exists as a directory!")
+	If (FileType(handlesFile) = FILETYPE_FILE And Not DeleteFile(handlesFile)) Then RuntimeError ("Cannot update " + handlesFile + " since original file can't be deleted")
+	If (Not CreateFile(handlesFile)) Then RuntimeError ("Cannot create " + handlesFile)
+	Local stream:TStream = OpenFile(handlesFile, False, True)
+	WriteLine(stream, xHandles[currentImage])
+	WriteLine(stream, yHandles[currentImage])
+	CloseStream(stream)
 End Function
 
 
