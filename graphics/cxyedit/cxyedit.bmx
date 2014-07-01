@@ -30,6 +30,8 @@ Global bgXD:Float = 0.0
 Global bgYD:Float = 0.0
 
 Global currentImage:Int = 0
+Global currentPixelX:Int = -1
+Global currentPixelY:Int = -1
 
 Global frameCounter:Int = 0
 
@@ -49,12 +51,14 @@ SelectImage(0)
 While Not (KeyHit(KEY_ESCAPE))
 	frameCounter :+ 1
 	Cls()
+	UpdateMouseXY()
 	CheckControls()
 	DrawBackground()
 	DrawCurrentImage()
 	DrawCornerOverlays()
 	DrawCXYOverlays()
 	DrawImageName()
+	DrawXY()
 	Flip(1)
 Wend
 
@@ -70,6 +74,24 @@ Function SelectImage(num:Int)
 	Local h:Float = ImageHeight(images[num])
 	Local r:Float = Max(w / (G_WIDTH - BORDER_MARGIN), h / (G_HEIGHT - BORDER_MARGIN))
 	camZoomInv = 1.0 / r
+End Function
+
+Function UpdateMouseXY()
+	Local w:Int = ImageWidth(images[currentImage])
+	Local h:Int = ImageHeight(images[currentImage])
+	Local w2:Float = w / 2.0
+	Local h2:Float = h / 2.0
+	Local x0:Float = G_WIDTH2 + camX + (-w2 * camZoomInv)
+	Local y0:Float = G_HEIGHT2 + camY + (-h2 * camZoomInv)
+	Local x:Float = (MouseX() - x0) / camZoomInv
+	Local y:Float = (MouseY() - y0) / camZoomInv
+	If (x >= 0.0 And x < w And y >= 0.0 And y < h)
+		currentPixelX = x
+		currentPixelY = y
+	Else
+		currentPixelX = -1
+		currentPixelY = -1
+	EndIf
 End Function
 
 Global frameDelayCounter:Int = 0
@@ -114,7 +136,11 @@ Function CheckControls()
 		EndIf
 		
 		If (MouseHit(1))
-			ChangeHandle(MouseX(), MouseY())
+			If (currentPixelX > -1 And currentPixelY > -1)
+				xHandles[currentImage] = currentPixelX
+				yHandles[currentImage] = currentPixelY
+				SaveCurrentHandle()
+			EndIf
 		Else
 			Local mz:Int = MouseZ()
 			If (mz < 0)
@@ -125,23 +151,6 @@ Function CheckControls()
 		EndIf
 	
 		FlushMouse()
-	EndIf
-End Function
-
-Function ChangeHandle(xs:Float, ys:Float)
-	Local w:Int = ImageWidth(images[currentImage])
-	Local h:Int = ImageHeight(images[currentImage])
-	Local w2:Float = w / 2.0
-	Local h2:Float = h / 2.0
-	Local x0:Float = G_WIDTH2 + camX + (-w2 * camZoomInv)
-	Local y0:Float = G_HEIGHT2 + camY + (-h2 * camZoomInv)
-	Local xH:Float = (xs - x0) / camZoomInv
-	Local yH:Float = (ys - y0) / camZoomInv
-	
-	If (xH > 0.0 And xH < w And yH > 0.0 And yH < h)
-		xHandles[currentImage] = xH
-		yHandles[currentImage] = yH
-		SaveCurrentHandle()
 	EndIf
 End Function
 
@@ -240,6 +249,35 @@ Function DrawImageName()
 	SetColor(255, 255, 255)
 	SetScale(5.0, 5.0)
 	DrawText(StripDir(validFiles[currentImage]), 20.0, 20.0)
+End Function
+
+Function DrawXY()
+	Local xText:String
+	Local yText:String
+	If (currentPixelX > -1 And currentPixelY > -1)
+		xText = currentPixelX
+		yText = currentPixelY
+	Else
+		xText = "---"
+		yText = "---"
+	EndIf
+	
+	SetBlend(ALPHABLEND)
+	SetRotation(0.0)
+	Local alpha:Float = Abs(((frameCounter * 0.03) Mod 2.0) - 1.0)
+	SetAlpha(alpha)
+	SetColor(0, 0, 0)
+	SetScale(4.1, 4.1)
+	DrawText(xText, G_WIDTH - 150.0, G_HEIGHT - 100.0)
+	SetColor(255, 0, 0)
+	SetScale(4.0, 4.0)
+	DrawText(xText, G_WIDTH - 150.0, G_HEIGHT - 100.0)
+	SetColor(0, 0, 0)
+	SetScale(4.1, 4.1)
+	DrawText(yText, G_WIDTH - 150.0, G_HEIGHT - 50.0)
+	SetColor(255, 0, 0)
+	SetScale(4.0, 4.0)
+	DrawText(yText, G_WIDTH - 150.0, G_HEIGHT - 50.0)
 End Function
 
 Function SaveCurrentHandle()
