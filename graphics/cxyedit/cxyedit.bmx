@@ -231,7 +231,7 @@ Function DrawCXYOverlays()
 	Local h2:Float = h / 2.0
 	
 	Local x:Float = G_WIDTH2 + camX + (-w2 + xHandles[currentImage]) * camZoomInv 
-	Local y:Float = G_HEIGHT2 + camY + (-w2 + yHandles[currentImage]) * camZoomInv 
+	Local y:Float = G_HEIGHT2 + camY + (-h2 + yHandles[currentImage]) * camZoomInv 
 
 	DrawRect(0.0, y, G_WIDTH, 1.0)
 	DrawRect(x, 0.0, 1.0, G_HEIGHT)
