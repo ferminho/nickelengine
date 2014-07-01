@@ -115,8 +115,8 @@ Function SetHandles(i:Int, file:String, cxyEditMode:Int = False)
 			Print("WARNING: cannot open file " + handlesFile + " since it's a directory")
 		EndIf
 	EndIf
-	xHandles[numbers[i]] = x
-	yHandles[numbers[i]] = y
+	xHandles[i] = x
+	yHandles[i] = y
 End Function
 
 Function NextPOT:Int(i : Int)
