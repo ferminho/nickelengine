@@ -72,14 +72,21 @@ Function SelectImage(num:Int)
 	camZoomInv = 1.0 / r
 End Function
 
+Global frameDelayCounter:Int = 0
 Function CheckControls()
 
-	If (KeyHit(KEY_Q) And currentImage > 0)
-		SelectImage(currentImage - 1)
-	ElseIf (KeyHit(KEY_E) And currentImage < Len(images) - 1)
-		SelectImage(currentImage + 1)
+	If (KeyDown(KEY_Q) And currentImage > 0)
+		If (frameDelayCounter= 0 Or frameDelayCounter> 60)
+			SelectImage(currentImage - 1)
+		EndIf
+		frameDelayCounter :+ 1
+	ElseIf (KeyDown(KEY_E) And currentImage < Len(images) - 1)
+		If (frameDelayCounter = 0 Or frameDelayCounter > 60)
+			SelectImage(currentImage + 1)
+		EndIf
+		frameDelayCounter :+ 1
 	Else
-	
+		frameDelayCounter = 0
 		If (KeyHit(KEY_SPACE))
 			camX = 0.0
 			camY = 0.0
