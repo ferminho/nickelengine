@@ -54,6 +54,7 @@ While Not (KeyHit(KEY_ESCAPE))
 	DrawCurrentImage()
 	DrawCornerOverlays()
 	DrawCXYOverlays()
+	DrawImageName()
 	Flip(1)
 Wend
 
@@ -219,6 +220,19 @@ Function DrawCXYOverlays()
 	DrawRect(0.0, y, G_WIDTH, 1.0)
 	DrawRect(x, 0.0, 1.0, G_HEIGHT)
 	SetColor(0, 0, 0)
+End Function
+
+Function DrawImageName()
+	SetBlend(ALPHABLEND)
+	SetRotation(0.0)
+	Local alpha:Float = Abs(((frameCounter * 0.025) Mod 2.0) - 1.0)
+	SetAlpha(alpha)
+	SetColor(0, 0, 0)
+	SetScale(5.1, 5.1)
+	DrawText(StripDir(validFiles[currentImage]), 20.0, 20.0)
+	SetColor(255, 255, 255)
+	SetScale(5.0, 5.0)
+	DrawText(StripDir(validFiles[currentImage]), 20.0, 20.0)
 End Function
 
 Function SaveCurrentHandle()
