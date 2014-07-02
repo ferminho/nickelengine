@@ -59,6 +59,14 @@ Type UGP
 		Return False
 	End Method
 
+	Method Unload()
+		image = Null
+		xHandles = xHandles[0..0]
+		yHandles= yHandles[0..0]
+		pngFile = ""
+		cxyFile = ""
+		frames = 0
+	End Method
 End Type
 
 
@@ -87,13 +95,13 @@ Function LoadImageForUGP:UGP(ugp:UGP, flags:Int)
 	ugp.frameHeight = Int(Mid(baseName, xPos + 1, Len(baseName) - (xPos + 1)))
 	If (ugp.frameWidth <= 0 Or ugp.frameHeight <= 0) Then Return Null
 
-	ugp.Image = LoadAnimImage(pngFile, ugp.frameWidth, ugp.frameHeight, 0, ugp.frames, flags)
+	ugp.Image = LoadAnimImage(ugp.pngFile, ugp.frameWidth, ugp.frameHeight, 0, ugp.frames, flags)
 	If (ugp.image = Null) Then Return Null
 	Return ugp
 End Function
 
 Function LoadCXYForUGP:UGP(ugp:UGP)
-	ugp.cxyFile = StripExt(pngFile) + ".cxy"
+	ugp.cxyFile = StripExt(ugp.pngFile) + ".cxy"
 	If (FileType(ugp.cxyFile) <> FILETYPE_FILE) Then Return DefaultCXYForUGP(ugp)
 	
 	Local stream:TStream = Null

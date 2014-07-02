@@ -21,6 +21,7 @@ Import MaxGUI.MaxGUI
 Import BRL.Retro
 
 Import "voidfpgvgp.bmx"	' FPG/VGP manager
+Import "../../graphics/ugp.bmx" ' UGPv2 new format
 Import "voidvba.bmx"	' VBA system
 Import "voidmath.bmx"	' math module
 
@@ -179,11 +180,12 @@ Next
 
 Global V:VBA = Null
 Global A:AnimState = Null
-Global File:VGP = Null
+Global FileUGP:UGP = Null
+Global FileVGP:VGP = Null
 
 Global SavePath:String = "untitled.uap"
 Global SaveFile:String = "untitled.uap"
-Global VGPName:String = "defbones.vgp"
+Global UGPVGPName:String = "defbones.vgp"
 
 Global IsSaved:Int = True
 Global LastSaved:Int = True
@@ -486,8 +488,9 @@ Global AnimsExchangeFrame:TGadget = CreateButton ("Frame", 390, 44, 45, 20, Anim
 UpdateWindowMenu (MainWindow)
 ActivateWindow (MainWindow)
 
-File = VGP.LoadVGP ("defbones.vgp")
-VGPName = "defbones.vgp"
+FileVGP = VGP.LoadVGP ("defbones.vgp")
+FileUGP = Null
+UGPVGPName = "defbones.vgp"
 
 FileNew ()
 InitVTrigonometric ()	' init cos & sin table
@@ -920,15 +923,28 @@ While True
 							EndIf
 						EndIf
 					Case BoneChangeVGP
-						S = RequestFile ("UAPEdit - VGP to load?", "VoiD Graphics Pack VGP (*.vgp):vgp", False, CurrentDir () + "/")
+						S = RequestFile ("UAPEdit - UGP to load?", "Unif Graphics Pack UGP (*.png):png;VoiD Graphics Pack VGP (*.vgp):vgp", False, CurrentDir () + "/")
 						If (S)
-							If (File) Then File.Unload ()
-							File = VGP.LoadVGP (S)
+							If (FileUGP) Then FileUGP.Unload()
+							If (FileVGP) Then FileVGP.Unload()
+							FileUGP = Null
+							FileVGP = Null
+							If (Lower(Right(Trim(S), 3)) = "png")
+								FileUGP = UGP.LoadUGP(S)
+							Else
+								FileVGP = VGP.LoadVGP (S)
+							EndIf
 '							File.ChangeRanges (255, 255, 255, 120, 240, 200, 255, 0, 0)
-							VGPName = StripDir (S)
+							UGPVGPName = StripDir (S)
 							RedrawMain = True
 							RedrawPreview = True
 							RedrawBone = True
+							If (FileUGP = Null And FileVGP = Null)
+								Notify("Bad format reading UGP/VGP")
+								FileVGP = VGP.LoadVGP ("defbones.vgp")
+								FileUGP = Null
+								UGPVGPName = "defbones.vgp"
+							EndIf
 						EndIf
 					Case BoneChangeSize
 						S = RequestString ("Enter new Bone Size", 10, True)
@@ -1644,6 +1660,8 @@ While True
 		End Select
 	Wend
 
+	Local ugp:Int = FileUGP <> Null
+
 '	If (RedrawMain)
 		SetGraphics (CanvasGraphics (MainCanvas))
 		SetViewport (0, 0, W_MAIN, H_MAIN)
@@ -1664,15 +1682,17 @@ While True
 		' restore :)
 		A.FrameTime2 = I
 		A.CurrentFrame = Frame
-	
+		
 		For RB = EachIn A.BoneList
 			' draw time
-			If (RB.Graph <> 0)
-				If (RB.Graph < File.Size)
-					If (File.Graph[RB.Graph])
-						SetRotation (RB.Angle)
-						SetScale (MainZoom * RB.Size, MainZoom * RB.Size)
-						DrawImage (File.Graph[RB.Graph].I, ToScreenX (RB.X), ToScreenY (RB.Y))
+			If (RB.Graph >= 0)
+				SetRotation (RB.Angle)
+				SetScale (MainZoom * RB.Size, MainZoom * RB.Size)
+				If (ugp And RB.Graph < FileUGP.frames)
+					DrawImage(FileUGP.image, ToScreenX (RB.X), ToScreenY (RB.Y), RB.Graph)
+				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
+					If (FileVGP.Graph[RB.Graph])
+						DrawImage (FileVGP.Graph[RB.Graph].I, ToScreenX (RB.X), ToScreenY (RB.Y))
 '					Else
 '						DrawImage (GraphicNotFound, ToScreenX (RB.X), ToScreenY (RB.Y))
 					EndIf
@@ -1704,12 +1724,14 @@ While True
 		SetBlend (ALPHABLEND)
 		For RB = EachIn A.BoneList
 			' draw time
-			If (RB.Graph <> 0)
-				If (RB.Graph < File.Size)
-					If (File.Graph[RB.Graph])
-						SetRotation (RB.Angle)
-						SetScale (PreviewZoom * RB.Size, PreviewZoom * RB.Size)
-						DrawImage (File.Graph[RB.Graph].I, ToScreen2X (RB.X), ToScreen2Y (RB.Y))
+			If (RB.Graph >= 0)
+				SetRotation (RB.Angle)
+				SetScale (PreviewZoom * RB.Size, PreviewZoom * RB.Size)
+				If (ugp And RB.Graph < FileUGP.frames)
+					DrawImage(FileUGP.image, ToScreen2X (RB.X), ToScreen2Y (RB.Y), RB.Graph)
+				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
+					If (FileVGP.Graph[RB.Graph])
+						DrawImage (FileVGP.Graph[RB.Graph].I, ToScreen2X (RB.X), ToScreen2Y (RB.Y))
 '					Else
 '						DrawImage (GraphicNotFound, ToScreen2X (RB.X), ToScreen2Y (RB.Y))
 					EndIf
@@ -1735,10 +1757,12 @@ While True
 		SetColor (255, 255, 255)
 		If (BoneSelected > -1)
 			I = ActFrameF.Bones[Bones[BoneSelected]].Graph
-			If (I <> 0)
-				If (I < File.Size)
-					If (File.Graph[I])
-						DrawImage (File.Graph[I].I, 75.0, 75.0)
+			If (I >= 0)
+				If (ugp And I < FileUGP.frames)
+					DrawImage(FileUGP.image, 75.0, 75.0, I)
+				ElseIf (Not ugp And I < FileVGP.Size)
+					If (FileVGP.Graph[I])
+						DrawImage (FileVGP.Graph[I].I, 75.0, 75.0)
 					Else
 						DrawImage (GraphicNotFound, 75.0, 75.0)
 					EndIf
@@ -1812,7 +1836,7 @@ Function UpdateBoneWindow ()
 	Local I:Int = 0
 	Local VB:VBABone = Null
 '	SetGadgetText (BoneNBones, "Bones : " + V.NBones)
-	SetGadgetText (BoneVGP, VGPName)
+	SetGadgetText (BoneVGP, UGPVGPName)
 	' Bone List
 	For I = 0 To (V.NBones - 1)
 		Bones[ActFrameF.Bones[I].Z] = I
@@ -1896,7 +1920,7 @@ Function FileNew ()
 	If (A) Then A.Unload ()
 '	If (File) Then File.Unload ()
 '	File = VGP.LoadVGP ("tools/defbones.vgp")
-'	VGPName = "defbones.vgp"
+'	UGPVGPName = "defbones.vgp"
 	V = New VBA
 	V.NBones = 1
 	V.Father = New VBABone
@@ -1953,7 +1977,7 @@ Function FileLoad (S:String)
 	If (A) Then A.Unload ()
 '	If (File) Then File.Unload ()
 '	File = VGP.LoadVGP ("tools/defbones.vgp")
-'	VGPName = "defbones.vgp"
+'	UGPVGPName = "defbones.vgp"
 	If (Lower(Right(Trim(S), 3)) = "vba")
 		V = VBA.LoadVBA (S)
 	Else
@@ -2352,6 +2376,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 	SetViewport (0, 0, SW, SH)
 	BBX1 = (SW / 2) - 1	BBY1 = (SH / 2) - 1
 	BBX2 = BBX1	BBY2 = BBY1
+	Local ugp:Int = FileUGP <> Null
 	While (ActTime < Float (TAnimTime))
 		ActTime:+ Float (IncFrame)
 		A.Update (ActTime)
@@ -2360,12 +2385,14 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 		Cls
 		For RB = EachIn A.BoneList
 			' bounding time
-			If (RB.Graph <> 0)
-				If (RB.Graph < File.Size)
-					If (File.Graph[RB.Graph])
-						SetRotation (RB.Angle)
-						SetScale (RB.Size * SX, RB.Size * SY)
-						DrawImage (File.Graph[RB.Graph].I, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY))
+			If (RB.Graph >= 0)
+				SetRotation (RB.Angle)
+				SetScale (RB.Size * SX, RB.Size * SY)
+				If (ugp And RB.Graph < FileUGP.frames)
+					DrawImage(FileUGP.image, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY), RB.Graph)
+				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
+					If (FileVGP.Graph[RB.Graph])
+						DrawImage (FileVGP.Graph[RB.Graph].I, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY))
 					EndIf
 				EndIf
 			EndIf
@@ -2431,12 +2458,14 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 		Cls
 		For RB = EachIn A.BoneList
 			' bounding time
-			If (RB.Graph <> 0)
+			If (RB.Graph >= 0)
 				SetRotation (RB.Angle)
 				SetScale (RB.Size * SX, RB.Size * SY)
-				If (RB.Graph < File.Size)
-					If (File.Graph[RB.Graph])
-						DrawImage (File.Graph[RB.Graph].I, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY))
+				If (ugp And RB.Graph < FileUGP.frames)
+					DrawImage (FileUGP.image, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY), RB.Graph)
+				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
+					If (FileVGP.Graph[RB.Graph])
+						DrawImage (FileVGP.Graph[RB.Graph].I, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY))
 					EndIf
 				EndIf
 			EndIf
@@ -2532,15 +2561,21 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 		Cls
 		For RB = EachIn A.BoneList
 			' draw time
-			If (RB.Graph <> 0)
-				If (RB.Graph < File.Size)
-					If (File.Graph[RB.Graph])
-						SetRotation (RB.Angle)
-						SetScale (RB.Size * SX, RB.Size * SY)
+			If (RB.Graph >= 0)
+				SetRotation (RB.Angle)
+				SetScale (RB.Size * SX, RB.Size * SY)
+				If (ugp And RB.Graph < FileUGP.frames)
+					If (Center)
+						DrawImage (FileUGP.image, (W2 / 2.0) + (RB.X * SX), (H2 / 2.0) + (RB.Y * SY), RB.Graph)
+					Else
+						DrawImage (FileUGP.image, -BBX1 + (RB.X * SX), -BBY1 + (RB.Y * SY), RB.Graph)
+					EndIf
+				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
+					If (FileVGP.Graph[RB.Graph])
 						If (Center)
-							DrawImage (File.Graph[RB.Graph].I, (W2 / 2.0) + (RB.X * SX), (H2 / 2.0) + (RB.Y * SY))
+							DrawImage (FileVGP.Graph[RB.Graph].I, (W2 / 2.0) + (RB.X * SX), (H2 / 2.0) + (RB.Y * SY))
 						Else
-							DrawImage (File.Graph[RB.Graph].I, -BBX1 + (RB.X * SX), -BBY1 + (RB.Y * SY))
+							DrawImage (FileVGP.Graph[RB.Graph].I, -BBX1 + (RB.X * SX), -BBY1 + (RB.Y * SY))
 						EndIf
 					EndIf
 				EndIf
