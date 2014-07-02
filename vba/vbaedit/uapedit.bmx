@@ -491,7 +491,7 @@ VGPName = "defbones.vgp"
 
 FileNew ()
 InitVTrigonometric ()	' init cos & sin table
-SetStatusText (MainWindow, "VBAEdit Started")
+SetStatusText (MainWindow, "UAPEdit Started")
 Help = False
 TimeToHelp = MilliSecs () + 5000
 
@@ -516,9 +516,9 @@ While True
 	EndIf
 	If (IsSaved <> LastSaved)
 		If (IsSaved)
-			SetGadgetText (MainWindow, "VBAEdit - " + SaveFile)
+			SetGadgetText (MainWindow, "UAPEdit - " + SaveFile)
 		Else
-			SetGadgetText (MainWindow, "VBAEdit - " + SaveFile + "*")
+			SetGadgetText (MainWindow, "UAPEdit - " + SaveFile + "*")
 		EndIf
 		LastSaved = IsSaved
 	EndIf
@@ -920,7 +920,7 @@ While True
 							EndIf
 						EndIf
 					Case BoneChangeVGP
-						S = RequestFile ("VBAEdit - VGP to load?", "VoiD Graphics Pack VGP (*.vgp):vgp", False, CurrentDir () + "/")
+						S = RequestFile ("UAPEdit - VGP to load?", "VoiD Graphics Pack VGP (*.vgp):vgp", False, CurrentDir () + "/")
 						If (S)
 							If (File) Then File.Unload ()
 							File = VGP.LoadVGP (S)
@@ -1436,7 +1436,7 @@ While True
 						If (IsSaved Or Confirm ("Start new Anim Pack? Changes will be lost")) Then FileNew ()
 					Case FILE_ABRIR
 						If (IsSaved Or Confirm ("Load Anim Pack? Changes will be lost"))
-							S = RequestFile ("VBAEdit - Select Anim Pack to open", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", False, CurrentDir () + "/")
+							S = RequestFile ("UAPEdit - Select Anim Pack to open", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", False, CurrentDir () + "/")
 							If (S) Then FileLoad (S)
 						EndIf
 					Case FILE_GUARDAR
@@ -1444,7 +1444,7 @@ While True
 							V.SaveVBA (SavePath)
 							IsSaved = True
 						Else
-							S = RequestFile ("VBAEdit - Select Anim Pack to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
+							S = RequestFile ("UAPEdit - Select Anim Pack to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
 							If (S)
 								If (Len (StripExt (S)) = Len (S)) Then S = S + ".uap"
 								If (Lower(Right(Trim(S), 3)) = "vba")
@@ -1458,7 +1458,7 @@ While True
 							EndIf
 						EndIf
 					Case FILE_GUARDARCOMO
-						S = RequestFile ("VBAEdit - Select VBA to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
+						S = RequestFile ("UAPEdit - Select VBA to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
 						If (S)
 							If (Len (StripExt (S)) = Len (S)) Then S = S + ".uap"
 							If (Lower(Right(Trim(S), 3)) = "vba")
@@ -1623,7 +1623,7 @@ While True
 				Select (EventSource ())
 					Case MainWindow
 						If (IsSaved) Then End
-						If (Confirm ("Exit VBAEdit? Changes will be lost"))
+						If (Confirm ("Exit UAPEdit? Changes will be lost"))
 							'postit : autosave?
 							End
 						EndIf
