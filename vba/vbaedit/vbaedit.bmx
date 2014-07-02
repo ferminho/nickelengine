@@ -1,12 +1,10 @@
-' VoiD.net
-' --------
-'
-' VBAEdit
+' UAPEdit - formerly known as VBAEdit from VoiD.net
 ' -----------
 ' Started 15-04-2006
-' Latest Version 07-01-2007
+' Latest VBAEdit Version 07-01-2007
+' From that point on... use HG to determine
 '
-' Unif Studios 2006/2007
+' Unif Studios 2006/2014
 
 SuperStrict 
 
