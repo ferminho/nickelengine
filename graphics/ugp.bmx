@@ -29,6 +29,8 @@ Type UGP
 		
 		ugp = LoadImageForUGP(ugp, flags)
 		If (ugp = Null) Then Return Null
+		ugp.xHandles = New Int[ugp.frames]
+		ugp.yHandles = New Int[ugp.frames]
 		ugp = LoadCXYForUGP(ugp)
 		If (ugp = Null) Then Return Null
 		
@@ -92,7 +94,7 @@ Function LoadImageForUGP:UGP(ugp:UGP, flags:Int)
 	Local xPos:Int = Instr(baseName, "x", dashPos)
 	If (xPos < 0) Then Return Null
 	ugp.frameWidth = Int(Mid(baseName, dashPos + 1, xPos - (dashPos + 1)))
-	ugp.frameHeight = Int(Mid(baseName, xPos + 1, Len(baseName) - (xPos + 1)))
+	ugp.frameHeight = Int(Mid(baseName, xPos + 1, Len(baseName) - xPos))
 	If (ugp.frameWidth <= 0 Or ugp.frameHeight <= 0) Then Return Null
 
 	ugp.Image = LoadAnimImage(ugp.pngFile, ugp.frameWidth, ugp.frameHeight, 0, ugp.frames, flags)
@@ -127,10 +129,9 @@ Function LoadCXYForUGP:UGP(ugp:UGP)
 End Function
 
 Function DefaultCXYForUGP:UGP(ugp:UGP)
-	ugp.xHandles = New Int[ugp.frames]	
-	ugp.yHandles = New Int[ugp.frames]	
 	For Local i:Int = 0 To ugp.frames - 1
 		ugp.xHandles[i] = 0
 		ugp.yHandles[i] = 0
 	Next
+	Return ugp
 End Function

@@ -405,7 +405,7 @@ Global BoneGraphX:TGadget = CreateButton ("X", 86, 42, 17, 20, BonePanel)
 Global BoneNew:TGadget = CreateButton ("New", 10, 230, 110, 20, BonesWindow)
 Global BoneDelete:TGadget = CreateButton ("Delete", 10, 250, 110, 20, BonesWindow)
 Global BoneChangeSize:TGadget = CreateButton ("Size", 10, 280, 110, 20, BonesWindow)
-Global BoneChangeVGP:TGadget = CreateButton ("Change VGP", 10, 310, 110, 20, BonesWindow)
+Global BoneChangeVGP:TGadget = CreateButton ("Change UGP", 10, 310, 110, 20, BonesWindow)
 CreateLabel ("Z", 134, 233, 8, 15, BonesWindow, LABEL_CENTER)
 Global BoneZChange:TGadget = CreateSlider (128, 250, 18, 95, BonesWindow, SLIDER_STEPPER)
 SetSliderRange (BoneZChange, 1, 3)
@@ -930,7 +930,7 @@ While True
 							FileUGP = Null
 							FileVGP = Null
 							If (Lower(Right(Trim(S), 3)) = "png")
-								FileUGP = UGP.LoadUGP(S)
+								FileUGP = UGP.LoadUGP(S, FILTEREDIMAGE)
 							Else
 								FileVGP = VGP.LoadVGP (S)
 							EndIf
@@ -1689,6 +1689,7 @@ While True
 				SetRotation (RB.Angle)
 				SetScale (MainZoom * RB.Size, MainZoom * RB.Size)
 				If (ugp And RB.Graph < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[RB.Graph], FileUGP.yHandles[RB.Graph])
 					DrawImage(FileUGP.image, ToScreenX (RB.X), ToScreenY (RB.Y), RB.Graph)
 				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
 					If (FileVGP.Graph[RB.Graph])
@@ -1728,6 +1729,7 @@ While True
 				SetRotation (RB.Angle)
 				SetScale (PreviewZoom * RB.Size, PreviewZoom * RB.Size)
 				If (ugp And RB.Graph < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[RB.Graph], FileUGP.yHandles[RB.Graph])
 					DrawImage(FileUGP.image, ToScreen2X (RB.X), ToScreen2Y (RB.Y), RB.Graph)
 				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
 					If (FileVGP.Graph[RB.Graph])
@@ -1759,6 +1761,7 @@ While True
 			I = ActFrameF.Bones[Bones[BoneSelected]].Graph
 			If (I >= 0)
 				If (ugp And I < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[I], FileUGP.yHandles[I])
 					DrawImage(FileUGP.image, 75.0, 75.0, I)
 				ElseIf (Not ugp And I < FileVGP.Size)
 					If (FileVGP.Graph[I])
@@ -2389,6 +2392,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 				SetRotation (RB.Angle)
 				SetScale (RB.Size * SX, RB.Size * SY)
 				If (ugp And RB.Graph < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[RB.Graph], FileUGP.yHandles[RB.Graph])
 					DrawImage(FileUGP.image, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY), RB.Graph)
 				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
 					If (FileVGP.Graph[RB.Graph])
@@ -2462,6 +2466,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 				SetRotation (RB.Angle)
 				SetScale (RB.Size * SX, RB.Size * SY)
 				If (ugp And RB.Graph < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[RB.Graph], FileUGP.yHandles[RB.Graph])
 					DrawImage (FileUGP.image, Float (SW / 2) - 1.0 + (RB.X * SX), Float (SH / 2) - 1.0 + (RB.Y * SY), RB.Graph)
 				ElseIf (Not ugp And RB.Graph < FileVGP.Size)
 					If (FileVGP.Graph[RB.Graph])
@@ -2565,6 +2570,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 				SetRotation (RB.Angle)
 				SetScale (RB.Size * SX, RB.Size * SY)
 				If (ugp And RB.Graph < FileUGP.frames)
+					SetImageHandle(FileUGP.image, FileUGP.xHandles[RB.Graph], FileUGP.yHandles[RB.Graph])
 					If (Center)
 						DrawImage (FileUGP.image, (W2 / 2.0) + (RB.X * SX), (H2 / 2.0) + (RB.Y * SY), RB.Graph)
 					Else
