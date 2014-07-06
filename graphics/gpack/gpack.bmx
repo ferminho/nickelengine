@@ -156,6 +156,7 @@ Function DrawImagesIntoPixmap(px:TPixmap, drawGrid:Int = False)
 		EndIf
 		DrawPixmapIntoPixmap(pixmaps[i], px, x, y)
 	Next
+	FilterAlphaEdges(px)
 	
 	If (drawGrid)
 		For Local i:Int = 1 To totalCols
@@ -200,6 +201,72 @@ Function ClearPixmap(px:TPixmap, a:Int, r:Int, g:Int, b:Int)
 			WritePixel(px, x, y, color)
 		Next
 	Next
+End Function
+
+Function FilterAlphaEdges(px:TPixmap)
+	Local w:Int = PixmapWidth(px)
+	Local h:Int = PixmapHeight(px)
+	Local newPixels:Int[] = New Int[w * h]
+	Local x:Int, y:Int
+	For y = 0 To h - 1
+		For x = 0 To w - 1
+			If ((ReadPixel(px, x, y) Shr 24) = 0) ' all alpha 0 pixels must be checked
+				newPixels[y * w + x] = AveragePixelsNoAlpha(px, x, y)
+			EndIf
+		Next
+	Next
+	For y = 0 To h - 1
+		For x = 0 To w - 1
+			If (newPixels[y * w + x] <> 0)
+				WritePixel(px, x, y, newPixels[y * w + x])
+			EndIf
+		Next
+	Next
+End Function
+
+Function AveragePixelsNoAlpha:Int(px:TPixmap, x:Int, y:Int)
+	Local w:Int = PixmapWidth(px)
+	Local h:Int = PixmapHeight(px)
+	
+	Local argb:Int
+	Local a:Float
+	Local r:Int, rAcum:Float
+	Local g:Int, gAcum:Float
+	Local b:Int, bAcum:Float
+	Local n:Float
+	
+	Local x0:Int = x - 1
+	Local x1:Int = x + 1
+	Local y0:Int = y - 1
+	Local y1:Int = y + 1
+	
+	If (x0 < 0) Then x0 = 0
+	If (x1 >= w) Then x1 = w - 1
+	If (y0 < 0) Then y0 = 0
+	If (y1 >= h) Then y1 = h - 1
+	
+	For y = y0 To y1
+		For x = x0 To x1
+			argb = ReadPixel(px, x, y)
+			a = argb Shr 24
+			If (a > 0)
+				a = a / 255.0
+				r = (argb Shl 8) Shr 24
+				g = (argb Shl 16) Shr 24
+				b = (argb Shl 24) Shr 24
+				rAcum :+ r * a
+				gAcum :+ g * a
+				bAcum :+ b * a
+				n :+ 1.0
+			EndIf
+		Next
+	Next
+	If (n = 0.0) Then Return 0
+	r = rAcum / n
+	g = gAcum / n
+	b = bAcum / n
+	Return (r Shl 16) + (g Shl 8) + b ' 0 alpha
+	
 End Function
 
 Function PrintArrayString(title:String, strs:String[])

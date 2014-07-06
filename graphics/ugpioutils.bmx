@@ -23,26 +23,48 @@ Global maxWidth:Int = 0
 Global maxHeight:Int = 0
 Global maxNumber:Int = 0
 
+Type FileEntry
+	Field name:String
+	Field number:Int
+End Type
+
 Function SelectValidPNGs(files:String[])
 	Local number:Int
+	Local listFiles:TList = New TList
+	
 	For Local file:String = EachIn files
 		If (Lower(ExtractExt(file)) = "png")
 			number = GetNumber(StripAll(file))
 			If (number > -1)
-				If (ArrayContainsInt(numbers, number))
+				If (ListContainsInt(listFiles, number))
 					Print("WARNING: repeated number " + number + " for file " + file)
 				ElseIf (number >= MAX_GRAPHICS)
 					Print("WARNING: graphic " + number + " out of limits for file " + file)
 				Else
 					If (number > maxNumber) Then maxNumber = number
-					validFiles = validFiles[..Len(validFiles) + 1]
-					validFiles[Len(validFiles) - 1] = file
-					numbers = numbers[..Len(numbers) + 1]
-					numbers[Len(numbers) - 1] = number
+					Local f:FileEntry = New FileEntry
+					f.number = number
+					f.name = file
+					listFiles.AddLast(f)
 				EndIf
 			EndIf
 		EndIf
 	Next
+	SortList(listFiles, True, CompareFileEntries)
+	validFiles = New String[listFiles.Count()]
+	numbers = New Int[listFiles.Count()]
+	
+	Local i:Int = 0
+	For Local o:Object = EachIn listFiles
+		Local fe:FileEntry = FileEntry(o)
+		validFiles[i] = fe.name
+		numbers[i] = fe.number
+		i :+ 1
+	Next
+End Function
+
+Function CompareFileEntries:Int(o1:Object, o2:Object)
+	Return FileEntry(o1).number - FileEntry(o2).number
 End Function
 
 Function GetNumber:Int(s:String)
@@ -57,9 +79,9 @@ Function GetNumber:Int(s:String)
 	Return Int(s)
 End Function
 
-Function ArrayContainsInt:Int(ints:Int[], i:Int)
-	For Local j:Int = EachIn ints
-		If (j = i)
+Function ListContainsInt:Int(fileEntries:TList, i:Int)
+	For Local o:Object = EachIn fileEntries
+		If (FileEntry(o).number = i)
 			Return True
 		EndIf
 	Next
@@ -80,7 +102,7 @@ Function LoadImages(midHandle:Int = False, loadImages:Int = False)
 				Throw "Null"
 			EndIf
 			If (loadImages) Then images[i] = LoadImage(file, 0)
-			SetHandles(i, file)
+			SetHandles(numbers[i], file)
 			If (PixmapWidth(pixmaps[i]) > MaxWidth) Then MaxWidth = PixmapWidth(pixmaps[i])
 			If (PixmapHeight(pixmaps[i]) > MaxHeight) Then MaxHeight = PixmapHeight(pixmaps[i])
 		Catch e:String

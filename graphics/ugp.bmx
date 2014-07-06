@@ -22,7 +22,7 @@ Type UGP
 	Field pngFile:String
 	Field cxyFile:String
 
-	Function LoadUGP:UGP(pngFile:String, flags:Int=FILTEREDIMAGE | MIPMAPPEDIMAGE)
+	Function LoadUGP:UGP(pngFile:String, flags:Int=FILTEREDIMAGE)
 	
 		Local ugp:UGP = New UGP
 		ugp.pngFile = pngFile

@@ -137,8 +137,8 @@ Function CheckControls()
 		
 		If (MouseHit(1))
 			If (currentPixelX > -1 And currentPixelY > -1)
-				xHandles[currentImage] = currentPixelX
-				yHandles[currentImage] = currentPixelY
+				xHandles[numbers[currentImage]] = currentPixelX
+				yHandles[numbers[currentImage]] = currentPixelY
 				SaveCurrentHandle()
 			EndIf
 		Else
@@ -230,8 +230,8 @@ Function DrawCXYOverlays()
 	Local w2:Float = w / 2.0
 	Local h2:Float = h / 2.0
 	
-	Local x:Float = G_WIDTH2 + camX + (-w2 + xHandles[currentImage]) * camZoomInv 
-	Local y:Float = G_HEIGHT2 + camY + (-h2 + yHandles[currentImage]) * camZoomInv 
+	Local x:Float = G_WIDTH2 + camX + (-w2 + xHandles[numbers[currentImage]]) * camZoomInv 
+	Local y:Float = G_HEIGHT2 + camY + (-h2 + yHandles[numbers[currentImage]]) * camZoomInv 
 
 	DrawRect(0.0, y, G_WIDTH, 1.0)
 	DrawRect(x, 0.0, 1.0, G_HEIGHT)
@@ -287,8 +287,8 @@ Function SaveCurrentHandle()
 	If (FileType(handlesFile) = FILETYPE_FILE And Not DeleteFile(handlesFile)) Then RuntimeError ("Cannot update " + handlesFile + " since original file can't be deleted")
 	If (Not CreateFile(handlesFile)) Then RuntimeError ("Cannot create " + handlesFile)
 	Local stream:TStream = OpenFile(handlesFile, False, True)
-	WriteLine(stream, xHandles[currentImage])
-	WriteLine(stream, yHandles[currentImage])
+	WriteLine(stream, xHandles[numbers[currentImage]])
+	WriteLine(stream, yHandles[numbers[currentImage]])
 	CloseStream(stream)
 End Function
 

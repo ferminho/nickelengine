@@ -930,7 +930,7 @@ While True
 							FileUGP = Null
 							FileVGP = Null
 							If (Lower(Right(Trim(S), 3)) = "png")
-								FileUGP = UGP.LoadUGP(S, FILTEREDIMAGE)
+								FileUGP = UGP.LoadUGP(S)
 							Else
 								FileVGP = VGP.LoadVGP (S)
 							EndIf
