@@ -121,7 +121,7 @@ End Function
 
 ' *********** CONSTS
 
-Const AboutLine:String = "~n~nVoiD.net : VBA Edit 1.0 ~n by Ferminho~n~nUnif Studios 2006"
+Const AboutLine:String = "~n~nVoiD.net : UAP Edit 1.1 ~n by Ferminho~n~nUnif Studios 2014"
 
 
 Const FILE_NUEVO:Int = 101
@@ -389,7 +389,7 @@ Global BoneAngle:TGadget = CreateLabel ("", 155, 318, 138, 15, BonesWindow, LABE
 Global BoneSize:TGadget = CreateLabel ("", 155, 333, 138, 15, BonesWindow, LABEL_CENTER)
 Global BonePanel:TGadget = CreatePanel (5, 155, 140, 70, BonesWindow, ..
 										PANEL_BORDER)
-CreateLabel ("VGP & Bone Graph Range", 5, 3, 127, 15, BonePanel, LABEL_CENTER)
+CreateLabel ("UGP & Bone Graph Range", 5, 3, 127, 15, BonePanel, LABEL_CENTER)
 Global BoneVGP:TGadget = CreateLabel ("defbones.vgp", 5, 20, 127, 15, BonePanel, ..
 										LABEL_CENTER | LABEL_FRAME)
 Global BoneRange1:TGadget = CreateTextArea (2, 42, 31, 20, BonePanel)
@@ -751,12 +751,12 @@ While True
 					Case PreviewPlay
 						If (IsPlaying)
 							IsPlaying = False
-							A.ChangeAnim (ActAnim, ActTime, 0)
+							A.ChangeAnim (ActAnim, ActTime, True)
 							A.FrameTime2 = 0
 							SetGadgetText (PreviewPlay, "Play")
 						Else
 							IsPlaying = True
-							A.ChangeAnim (ActAnim, ActTime, 0)
+							A.ChangeAnim (ActAnim, ActTime, True)
 							SetGadgetText (PreviewPlay, "Stop")
 						EndIf
 						RedrawPreview = True
@@ -1474,7 +1474,7 @@ While True
 							EndIf
 						EndIf
 					Case FILE_GUARDARCOMO
-						S = RequestFile ("UAPEdit - Select VBA to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
+						S = RequestFile ("UAPEdit - Select Anim Pack to save as", "Unif Anim Pack (*.uap):uap;VoiD Bone Animation (*.vba):vba", True, CurrentDir () + "/")
 						If (S)
 							If (Len (StripExt (S)) = Len (S)) Then S = S + ".uap"
 							If (Lower(Right(Trim(S), 3)) = "vba")
@@ -1601,7 +1601,7 @@ While True
 					Case VIEW_RESTORE
 						SetGadgetShape (MainWindow, 50, 50, 820, 655)
 					Case SET_HEIGHT
-						S = RequestString ("New VBA height? (actual : " + V.Height + ")", 10, True)
+						S = RequestString ("New UAP height? (actual : " + V.Height + ")", 10, True)
 						If (Not Cancel)
 							If (Len (S) = 0) Then S = "0"
 							V.Height = Float (S)
@@ -1949,7 +1949,7 @@ Function FileNew ()
 	A.FrameTime2 = 0
 	Bones = Bones[0..0]
 	Bones = Bones[..64]
-	SetStatusText (MainWindow, "New VBA started")
+	SetStatusText (MainWindow, "New UAP started")
 	SetGadgetText (SetHeight, "Height [" + V.Height + "]")
 	SaveFile = "untitled.uap"
 	SavePath = "untitled.uap"
@@ -2369,7 +2369,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 		' FPS
 		IncFrame = 1000 / Int (TextAreaText (PNGInfoN))
 	EndIf
-	A.ChangeAnim (ActAnim, ActTime, 0)
+	A.ChangeAnim (ActAnim, ActTime, True)
 	' first pass... let's calculate bounds
 	SetGraphics (CanvasGraphics (BigCanvas))
 	SetAlpha (1.0)
@@ -2550,7 +2550,7 @@ Function ExportActAnim (S:String, SX:Float, SY:Float, Power:Int, Square:Int, Cen
 	EndIf
 		
 	ActTime = 0.0
-	A.ChangeAnim (ActAnim, ActTime, 0)
+	A.ChangeAnim (ActAnim, ActTime, True)
 	SetGraphics (CanvasGraphics (BigCanvas))
 	SetAlpha (1.0)
 	SetColor (255, 255, 255)
@@ -2611,9 +2611,9 @@ Function PutAnim (N:Int)
 	ActFrame = 0
 	ActFrameF = V.Anim[N].Frames
 	If (IsPlaying)
-		A.ChangeAnim (N, ActTime, AnimDelay)
+		A.ChangeAnim (N, ActTime, True, AnimDelay)
 	Else
-		A.ChangeAnim (N, ActTime, 0)
+		A.ChangeAnim (N, ActTime, True)
 		A.FrameTime2 = 0
 	EndIf
 End Function

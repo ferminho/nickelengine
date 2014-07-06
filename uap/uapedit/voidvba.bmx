@@ -811,9 +811,9 @@ Type VBABone	' bone
 		If (Sr.HasValue())
 			Result = New VBABone
 			Result.ID = Sr.ReadInt()
-			Sr.ReadString() 'TODO: name - unused yet
-			Sr.ReadInt() 'TODO: range1 - unused yet
-			Sr.ReadInt() 'TODO: range2 - unused yet
+			Result.Name = Sr.ReadString()
+			Result.Range1 = Sr.ReadInt()
+			Result.Range2 = Sr.ReadInt()
 			
 			'children
 			Sr.ReadSubSectionStart()
@@ -965,7 +965,9 @@ Type VBAAnim
 		
 		For Local i:Int = 0 To Len(animationsContent) - 1
 			animations[i] = New VBAAnim
-			animations[i].Frames = VBAFrame.LoadFromVBA(animationsContent[i].Split(FrameSeparator))
+			Local framesContent:String[] = animationsContent[i].Split(FrameSeparator)
+			animations[i].Frames = VBAFrame.LoadFromVBA(framesContent)
+			animations[i].NFrames = Len(framesContent)
 			If (animations[i].Frames <> Null)
 				animations[i].Duration = animations[i].Frames.GetTotalDuration()
 			End If
@@ -1091,7 +1093,7 @@ Type VBABoneState
 		
 		bs.X = sr.ReadFloat()
 		bs.Y = sr.ReadFloat()
-		bs.Angle = sr.ReadFloat()
+		bs.Angle = 360.0 - sr.ReadFloat() ' remember UAP uses standard CCW angles and bmax does not
 		bs.Z = sr.ReadInt()
 		bs.Size = sr.ReadFloat()
 		bs.Graph = sr.ReadInt()
