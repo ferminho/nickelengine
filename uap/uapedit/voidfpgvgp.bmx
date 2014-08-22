@@ -59,20 +59,20 @@ Type VGP
 			GBlack.I = CreateImage (1, 1, 1, 0)
 		EndIf
 
-		If (FH.Readbyte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
-		If (FH.Readbyte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
-		If (FH.Readbyte () <> $36) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
+		If (FH.ReadByte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
+		If (FH.ReadByte () <> $36) Then Crash ("Wrong header reading FPG " + File)
 
-		If (FH.Readbyte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
-		If (FH.Readbyte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $00) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
+		If (FH.ReadByte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $00) Then Crash ("Wrong header reading FPG " + File)
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
 
 		While (Not FH.Eof ())
-			I = FH.Readint ()
+			I = FH.ReadInt ()
 
 			If (F.Size <= I) Then
 				F.Size = I + 1
@@ -86,8 +86,8 @@ Type VGP
 			FH.SkipBytes (32) 'Description of map - useless
 			FH.SkipBytes (12) 'Name of map filename - useless
 			
-			T.W = FH.Readint () 'Width
-			T.H = FH.Readint () 'Height
+			T.W = FH.ReadInt () 'Width
+			T.H = FH.ReadInt () 'Height
 			T.I = CreateImage (T.W, T.H, 1, F.VFlags)
 			Im = T.I
 			
@@ -172,21 +172,21 @@ Type VGP
 
 		If (Not FH) Then Crash ("FPG " + File$ + " not found")
 
-		If (FH.Readbyte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
-		If (FH.Readbyte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
-		If (FH.Readbyte () <> $36) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
+		If (FH.ReadByte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
+		If (FH.ReadByte () <> $36) Then Crash ("Wrong header reading FPG " + File)
 
-		If (FH.Readbyte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
-		If (FH.Readbyte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $00) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
+		If (FH.ReadByte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $00) Then Crash ("Wrong header reading FPG " + File)
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
 		File = ExtractDir (File) + "/"
 
 		While (Not FH.Eof ())
-			I = FH.Readint ()
+			I = FH.ReadInt ()
 
 			If (F.Size <= I) Then
 				F.Size = I + 1
@@ -199,8 +199,8 @@ Type VGP
 			
 			FH.SkipBytes (32) 'Description of map - useless
 			Name = FReadString (FH, 12) 'Name of map filename - useless
-			T.W = FH.Readint () 'Width
-			T.H = FH.Readint () 'Height
+			T.W = FH.ReadInt () 'Width
+			T.H = FH.ReadInt () 'Height
 			T.I = LoadImage (File + Name, F.VFlags)
 			
 			T.CPs = FH.ReadInt () 'Number of Control Points
@@ -267,16 +267,16 @@ Type VGP
 
 		If (Not FH) Then Crash ("VGP " + File$ + " not found")
 
-		If (FH.Readbyte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
-		If (FH.Readbyte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
-		If (FH.Readbyte () <> $50) Then Crash ("Wrong header reading VGP " + File)
+		If (FH.ReadByte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
+		If (FH.ReadByte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
+		If (FH.ReadByte () <> $50) Then Crash ("Wrong header reading VGP " + File)
 
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
 
 		While (Not FH.Eof ())
-			I = FH.Readint ()
+			I = FH.ReadInt ()
 
 			If (F.Size <= I) Then
 				F.Size = I + 1
@@ -287,8 +287,8 @@ Type VGP
 			T = F.Graph[I]
 			FH.SkipBytes (4) 'Bitmap length - useless
 			
-			T.W = FH.Readint () 'Width
-			T.H = FH.Readint () 'Height
+			T.W = FH.ReadInt () 'Width
+			T.H = FH.ReadInt () 'Height
 			T.I = CreateImage (T.W, T.H, 1, F.VFlags)
 			Im = T.I
 			
@@ -624,21 +624,21 @@ Type SSVGP
 
 		If (Not FH) Then Crash ("FPG " + File$ + " not found")
 
-		If (FH.Readbyte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
-		If (FH.Readbyte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
-		If (FH.Readbyte () <> $36) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
+		If (FH.ReadByte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
+		If (FH.ReadByte () <> $36) Then Crash ("Wrong header reading FPG " + File)
 
-		If (FH.Readbyte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
-		If (FH.Readbyte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $00) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
+		If (FH.ReadByte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $00) Then Crash ("Wrong header reading FPG " + File)
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
 		File = ExtractDir (File) + "/"
 
 		While (Not FH.Eof ())
-			I = FH.Readint ()
+			I = FH.ReadInt ()
 
 			If (F.Size < I) Then
 				F.Size = I
@@ -651,8 +651,8 @@ Type SSVGP
 			
 			FH.SkipBytes (32) 'Description of map - useless
 			Name = FReadString (FH, 12) 'Name of map filename - useless
-			T.W = FH.Readint () 'Width
-			T.H = FH.Readint () 'Height
+			T.W = FH.ReadInt () 'Width
+			T.H = FH.ReadInt () 'Height
 			T.I = LoadImage (File + Name, F.VFlags)
 			
 			T.CPs = FH.ReadInt () 'Number of Control Points
@@ -718,16 +718,16 @@ Type SSVGP
 
 		If (Not FH) Then Crash ("VGP " + File$ + " not found")
 
-		If (FH.Readbyte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
-		If (FH.Readbyte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
-		If (FH.Readbyte () <> $50) Then Crash ("Wrong header reading VGP " + File)
+		If (FH.ReadByte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
+		If (FH.ReadByte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
+		If (FH.ReadByte () <> $50) Then Crash ("Wrong header reading VGP " + File)
 
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
 
 		While (Not FH.Eof ())
-			I = FH.Readint ()
+			I = FH.ReadInt ()
 
 			If (F.Size < (I + 1)) Then
 				F.Size = (I + 1)
@@ -738,8 +738,8 @@ Type SSVGP
 			T = F.Graph[I]
 			FH.SkipBytes (4) 'Bitmap length - useless
 			
-			T.W = FH.Readint () 'Width
-			T.H = FH.Readint () 'Height
+			T.W = FH.ReadInt () 'Width
+			T.H = FH.ReadInt () 'Height
 			T.I = CreateImage (T.W, T.H, 1, F.VFlags)
 			Im = T.I
 			
@@ -1044,14 +1044,14 @@ Type PVGP
 		
 		If (Not FH) Then Crash ("FPG " + File$ + " not found")
 
-		If (FH.Readbyte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
-		If (FH.Readbyte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
-		If (FH.Readbyte () <> $36) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $66) Then Crash ("Wrong header reading FPG " + File) 'Header f16
+		If (FH.ReadByte () <> $31) Then Crash ("Wrong header reading FPG " + File) 
+		If (FH.ReadByte () <> $36) Then Crash ("Wrong header reading FPG " + File)
 
-		If (FH.Readbyte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
-		If (FH.Readbyte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
-		If (FH.Readbyte () <> $00) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $1a) Then Crash ("Wrong header reading FPG " + File) 'Rest of header
+		If (FH.ReadByte () <> $0d) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $0a) Then Crash ("Wrong header reading FPG " + File)
+		If (FH.ReadByte () <> $00) Then Crash ("Wrong header reading FPG " + File)
 		FH.Skipbytes (1) 'Version byte
 
 		SetMaskColor (0, 0, 0)
@@ -1068,12 +1068,12 @@ Type PVGP
 			FH.SkipBytes (32) 'Description of map - useless
 			FH.SkipBytes (12) 'Name of map filename - useless
 			
-			W = FH.Readint () 'Width
-			H = FH.Readint () 'Height
+			W = FH.ReadInt () 'Width
+			H = FH.ReadInt () 'Height
 			F.Graph[I] = CreatePixmap (W, H, PF_RGBA8888)
 			PM = F.Graph[I]
 			
-			X = FH.Readint () 'Number of Control Points
+			X = FH.ReadInt () 'Number of Control Points
 			While (X > 0)
 				FH.Skipbytes (4) ' X and Y - useless
 				X:-1
@@ -1117,9 +1117,9 @@ Type PVGP
 		
 		If (Not FH) Then Crash ("FPG " + File$ + " not found")
 
-		If (FH.Readbyte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
-		If (FH.Readbyte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
-		If (FH.Readbyte () <> $50) Then Crash ("Wrong header reading VGP " + File)
+		If (FH.ReadByte () <> $56) Then Crash ("Wrong header reading VGP " + File) 'Header VGP
+		If (FH.ReadByte () <> $47) Then Crash ("Wrong header reading VGP " + File) 
+		If (FH.ReadByte () <> $50) Then Crash ("Wrong header reading VGP " + File)
 
 		FH.Skipbytes (1) 'Version byte
 
@@ -1134,12 +1134,12 @@ Type PVGP
 			EndIf
 			FH.SkipBytes (4) 'Bitmap length - useless
 			
-			W = FH.Readint () 'Width
-			H = FH.Readint () 'Height
+			W = FH.ReadInt () 'Width
+			H = FH.ReadInt () 'Height
 			F.Graph[I] = CreatePixmap (W, H, PF_RGBA8888)
 			PM = F.Graph[I]
 			
-			X = FH.Readint () 'Number of Control Points
+			X = FH.ReadInt () 'Number of Control Points
 			While (X > 0)
 				FH.Skipbytes (4) ' X and Y - useless
 				X:-1
@@ -1349,12 +1349,12 @@ Function FReadString:String (FH:TStream, L)
 End Function
 
 Function FReadShort:Short (FH:TStream)
-	Local S:Short = FH.Readbyte() + (FH.Readbyte() * 256)
+	Local S:Short = FH.ReadByte() + (FH.ReadByte() * 256)
 	Return (S)
 End Function
 
 Function FReadInt:Int (FH:TStream)
-	Local I:Int = FH.Readbyte() + (FH.Readbyte() * 256) + (FH.Readbyte() * 65536) + (FH.Readbyte() * 16777216)
+	Local I:Int = FH.ReadByte() + (FH.ReadByte() * 256) + (FH.ReadByte() * 65536) + (FH.ReadByte() * 16777216)
 	Return (I)
 End Function
 
