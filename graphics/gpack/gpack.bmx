@@ -156,6 +156,8 @@ Function DrawImagesIntoPixmap(px:TPixmap, drawGrid:Int = False)
 		EndIf
 		DrawPixmapIntoPixmap(pixmaps[i], px, x, y)
 	Next
+	' FILTER EDGES : will "extend" a border around non-100%-transparent pixels, color-averaging the surrounding pixels but with 0% alpha
+	' This will make pixel interpolation look nice on edges
 	FilterAlphaEdges(px)
 	
 	If (drawGrid)
