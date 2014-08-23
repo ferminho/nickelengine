@@ -5,8 +5,15 @@ Private
 Import mojo
 Import brl.filepath
 Import brl.stringutils
+Import NickelEngine.system.exception
 
 Public
+
+Class UGPLoadException Extends Exception
+	Method New(msg:String)
+		Super.New(msg)
+	End Method
+End Class
 
 Class UGP
 Private
@@ -19,18 +26,18 @@ Private
 	
 	Field pngFile:String
 	Field cxyFile:String
-		
+	
 Public
 
-	Method New(pngFile:String, mandatoryCXY:Bool = False, flags:Int = DefaultFlags)
+	Method New(pngFile:String, mandatoryCXY:Bool = False, flags:Int = Image.DefaultFlags)
 		Self.pngFile = pngFile
 		If (Not ParseLoadImage(flags))
-			Throw "Image for UGP " + pngFile + " cannot be loaded"
+			Throw New UGPLoadException("Image for UGP " + pngFile + " cannot be loaded")
 		End If
 		If (Not ParseLoadCXY())
-			If (mandatoryCXY) Then Throw "CXY for UGP " + pngFile + " cannot be loaded"
-			xHandles = New Int[image.Frames]
-			yHandles = New Int[image.Frames]
+			If (mandatoryCXY) Then Throw New UGPLoadException("CXY for UGP " + pngFile + " cannot be loaded")
+			xHandles = New Int[image.Frames()]
+			yHandles = New Int[image.Frames()]
 		End If
 	End Method
 
@@ -72,39 +79,35 @@ Private
 		If (frameWidth <= 0 Or frameHeight <= 0) Then Return False
 
 		image = LoadImage(pngFile, frameWidth, frameHeight, frames, flags)
+		Return True
 	End Method
 	
 	Method ParseLoadCXY:Bool()
-		cxyFile = StripExt(ugp.pngFile) + ".cxy"
+		cxyFile = StripExt(pngFile) + ".cxy"
 		
 		Local cxyString:String = LoadString(cxyFile)
 		
-		If (cxyString = Null Or cxyString.Trim().Length = 0) Then Return False
+		If (cxyString.Trim().Length() = 0) Then Return False
 
 		cxyString.Replace("~r~n", "~n")
 		Local lines:String[] = cxyString.Split("~n")
 		
-		If (lines.Length <> image.Frames * 2) Then Return False
+		' can't be strict in this check since usually we will find extra empty lines at the end
+		If (lines.Length < image.Frames() * 2) Then Return False
 
-		xHandles = New Int[image.Frames]
-		yHandles = New Int[image.Frames]
+		xHandles = New Int[image.Frames()]
+		yHandles = New Int[image.Frames()]
 
 		Local line:String
 		For Local i:Int = 0 To image.Frames() - 1
 			line = lines[i * 2]
-			If (line = Null Or line.Trim().Length = 0) Then Return False
+			If (line.Trim().Length = 0) Then Return False
 			xHandles[i] = Int(line.Trim())
 			line = lines[(i * 2) + 1]
-			If (line = Null Or line.Trim().Length = 0) Then Return False
+			If (line.Trim().Length = 0) Then Return False
 			yHandles[i] = Int(line.Trim())
 		Next
-			
-			CloseStream(stream)
-			Return ugp
-		Catch ex:String
-			If (stream <> Null) Then CloseStream(stream)
-		EndTry
-	Return DefaultCXYForUGP(ugp)
 	
+		Return True
 	End Method
 End Class

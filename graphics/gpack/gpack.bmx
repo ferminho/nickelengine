@@ -126,7 +126,7 @@ Function WriteHandles()
 		Local stream:TStream = OpenFile(handlesFile, True, True)
 		For Local i:Int = 0 To maxNumber
 			WriteLine(stream, xHandles[i])
-			WriteLine(stream, yHandles[i])
+			WriteLine(stream, yHandles[i]) 'this will leave an extra empty line at the end...
 		Next
 		CloseStream(stream)
 	EndIf	
